@@ -11,6 +11,7 @@
   <depend>pluginlib</depend>
   <depend>rviz_common</depend>
   <depend>ros_system_monitor_msgs</depend>
+  <depend>omniplanner_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

@@ -6,6 +6,7 @@
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <ros_system_monitor_msgs/msg/node_info_msg.hpp>
+#include <omniplanner_msgs/msg/language_goal_msg.hpp>
 
 // Qt
 #include <QLabel>
@@ -30,7 +31,7 @@ protected:
 
   // ROS2 member variables
   std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface> p_node_abstraction_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr instruction_publisher_;
+  rclcpp::Publisher<omniplanner_msgs::msg::LanguageGoalMsg>::SharedPtr instruction_publisher_;
   rclcpp::Publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>::SharedPtr system_monitor_publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr llm_response_subscription_;
 

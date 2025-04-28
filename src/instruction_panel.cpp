@@ -46,7 +46,7 @@ void InstructionPanel::onInitialize(){
   rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
 
   // Create the publishers & subscriptions
-  instruction_publisher_ = node->create_publisher<std_msgs::msg::String>("/omniplanner_node/language_planner/language_goal", 10);
+  instruction_publisher_ = node->create_publisher<omniplanner_msgs::msg::LanguageGoalMsg>("/omniplanner_node/language_planner/language_goal", 10);
   system_monitor_publisher_ = node->create_publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>("~/node_status", 1);
   llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>("~/llm_response", 10, std::bind(&InstructionPanel::handleLLMResponse, this, std::placeholders::_1));
   return;
@@ -59,8 +59,9 @@ void InstructionPanel::handleLLMResponse(std_msgs::msg::String const & msg ){
 
 void InstructionPanel::publishInstruction( void ){
   // Construct and publish the instruction text as a String message 
-  auto msg = std_msgs::msg::String();
-  msg.data = p_instruction_editor_->text().toStdString();
+  auto msg = omniplanner_msgs::msg::LanguageGoalMsg();
+  msg.robot_id = "NO ONE";
+  msg.command = p_instruction_editor_->text().toStdString();
   instruction_publisher_->publish( msg );
 
   // Update the display for the previous instruction
@@ -77,7 +78,7 @@ void InstructionPanel::publishSystemMonitor( void ){
   msg.nickname = "nlu_rviz_panel";
   msg.node_name = p_node->get_fully_qualified_name();
   msg.status = ros_system_monitor_msgs::msg::NodeInfoMsg::NOMINAL;
-  msg.notes = "";
+  msg.notes = "You gonna give me orders?";
   system_monitor_publisher_->publish( msg );
   return;
 }
