@@ -29,7 +29,7 @@ protected:
 
 
   // ROS2 member variables
-  std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface> node_ptr_;
+  std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface> p_node_abstraction_;
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr instruction_publisher_;
   rclcpp::Publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>::SharedPtr system_monitor_publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr llm_response_subscription_;

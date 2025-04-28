@@ -42,13 +42,13 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
 }
 
 void InstructionPanel::onInitialize(){
-  node_ptr_ = getDisplayContext()->getRosNodeAbstraction().lock();
-  rclcpp::Node::SharedPtr node = node_ptr_->get_raw_node();
+  p_node_abstraction_ = getDisplayContext()->getRosNodeAbstraction().lock();
+  rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
 
   // Create the publishers & subscriptions
-  instruction_publisher_ = node->create_publisher<std_msgs::msg::String>("/instruction", 10);
+  instruction_publisher_ = node->create_publisher<std_msgs::msg::String>("/omniplanner_node/language_planner/language_goal", 10);
   system_monitor_publisher_ = node->create_publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>("~/node_status", 1);
-  llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>("/llm_response", 10, std::bind(&InstructionPanel::handleLLMResponse, this, std::placeholders::_1));
+  llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>("~/llm_response", 10, std::bind(&InstructionPanel::handleLLMResponse, this, std::placeholders::_1));
   return;
 }
 
@@ -69,9 +69,13 @@ void InstructionPanel::publishInstruction( void ){
 }
 
 void InstructionPanel::publishSystemMonitor( void ){
+  // Get the ROS2 node
+  auto p_node = p_node_abstraction_->get_raw_node();
+
+  // Construct the message
   auto msg = ros_system_monitor_msgs::msg::NodeInfoMsg();
   msg.nickname = "nlu_rviz_panel";
-  msg.node_name = "/rviz2_node";
+  msg.node_name = p_node->get_fully_qualified_name();
   msg.status = ros_system_monitor_msgs::msg::NodeInfoMsg::NOMINAL;
   msg.notes = "";
   system_monitor_publisher_->publish( msg );
