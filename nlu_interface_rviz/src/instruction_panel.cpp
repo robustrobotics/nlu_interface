@@ -1,8 +1,8 @@
-#include <nlu_interface/instruction_panel.hpp>
+#include <nlu_interface_rviz/instruction_panel.hpp>
 #include <QVBoxLayout>
 #include <rviz_common/display_context.hpp>
 
-namespace nlu_interface {
+namespace nlu_interface_rviz {
 InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
   // Create the layout for the instruction field
   QHBoxLayout * p_instruction_layout = new QHBoxLayout;
@@ -83,7 +83,7 @@ void InstructionPanel::publishSystemMonitor( void ){
   return;
 }
 
-}  // namespace nlu_interface
+}  // namespace nlu_interface_rviz
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(nlu_interface::InstructionPanel, rviz_common::Panel)
+PLUGINLIB_EXPORT_CLASS(nlu_interface_rviz::InstructionPanel, rviz_common::Panel)
