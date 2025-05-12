@@ -1,0 +1,5 @@
+<library path="instruction_panel">
+  <class type="nlu_interface_rviz::InstructionPanel" base_class_type="rviz_common::Panel">
+    <description></description>
+  </class>
+</library>

@@ -1,5 +1,6 @@
+import os
 # LLM Imports
-import tiktoken
+#import tiktoken
 import requests
 
 """ Exceptions
@@ -24,7 +25,7 @@ models_map = MappingProxyType(
 )
 
 prompt_modes_set = (
-    "naive",
+    "default",
     "chain-of-thought",
 )
 
@@ -55,16 +56,16 @@ class Prompt:
     @classmethod
     def from_dict(cls, d, new_instruction=None, new_scene_graph=None):
         system = d["system"]
-        incontext_examples_preamble = d["incontext_examples_preamble"]
-        incontext_examples = [ IncontextExample.from_dict(e) for e in d["incontext_examples"] ]
-        new_instruction_preamble = d["new_instruction_preamble"]
-        response_format = d["response_format"]
+        incontext_examples_preamble = d["incontext-examples-preamble"]
+        incontext_examples = [ IncontextExample.from_dict(e) for e in d["incontext-examples"] ]
+        new_instruction_preamble = d["new-instruction-preamble"]
+        response_format = d["response-format"]
         
         # Only load the "new instruction" from the dictionary if no function arg provided
-        if not new_instruction and "new_instruction" in d
-            new_instruction = d["new_instruction"]
-        if not new_scene_graph and "new_scene_graph" in d
-            new_scene_graph = d["new_scene_graph"]
+        if not new_instruction and "new-instruction" in d:
+            new_instruction = d["new-instruction"]
+        if not new_scene_graph and "new-scene-graph" in d:
+            new_scene_graph = d["new-scene-graph"]
 
         return cls(
             system,
@@ -81,17 +82,17 @@ class Prompt:
         if self.system:
             d["system"] = self.system
         if self.incontext_examples_preamble:
-            d["incontext_examples_preamble"] = self.incontext_examples_preamble
+            d["incontext-examples-preamble"] = self.incontext_examples_preamble
         if self.incontext_examples:
-            d["incontext_examples"] = self.incontext_examples
+            d["incontext-examples"] = self.incontext_examples
         if self.new_instruction_preamble:
-            d["new_instruction_preamble"] = self.new_instruction_preamble
+            d["new-instruction-preamble"] = self.new_instruction_preamble
         if self.new_instruction:
-            d["new_instruction"] = self.new_instruction
+            d["new-instruction"] = self.new_instruction
         if self.new_scene_graph:
-            d["new_scene_graph"] = self.new_scene_graph
+            d["new-scene-graph"] = self.new_scene_graph
         if self.response_format:
-            d["response_format"] = self.response_format
+            d["response-format"] = self.response_format
         return d
 
     def to_openai_messages(self, num_incontext_examples):
@@ -122,16 +123,16 @@ class IncontextExample:
 
     @classmethod
     def from_dict(cls, d):
-        example_input = d["example_input"]
-        example_output = d["example_output"]
+        example_input = d["example-input"]
+        example_output = d["example-output"]
         return cls(example_input, example_output)
 
     def to_dict(self):
         d = {}
         if self.example_input:
-            d["example_input"] = self.example_input
+            d["example-input"] = self.example_input
         if self.example_output:
-            d["example_output"] = self.example_output
+            d["example-output"] = self.example_output
         return d
 
     def to_prompt(self):
@@ -165,14 +166,14 @@ class LLMInterface:
     @classmethod
     def from_dict(cls, d):
         # Load from the dict
-        self.model_name = d["model_name"]
-        self.prompt_mode = d["prompt_mode"]
+        self.model_name = d["model-name"]
+        self.prompt_mode = d["prompt-mode"]
         self.prompt = Prompt.from_dict( d["prompt"] )
-        self.num_incontext_examples = d["num_incontext_examples"]
+        self.num_incontext_examples = d["num-incontext-examples"]
         self.temperature = d["temperature"]
         self.seed = d["seed"]
-        self.api_timeout = d["api_timeout"]
-        self.response_history = d["response_history"]
+        self.api_timeout = d["api-timeout"]
+        self.response_history = d["response-history"]
 
         # Validate the initialization
         self.__validate_initialization()
@@ -215,31 +216,31 @@ class LLMInterface:
             raise ConstructionFailure(f"Unable to create a client for the model \"{self.model_name}\".")
         if self.debug:
             if hasattr(self, "openai_client"):
-                print(f"Successfully created an OpenAI client for model \"{self.model_name}\"".)
+                print(f"Successfully created an OpenAI client for model \"{self.model_name}\".")
             if hasattr(self, "anthropic_client"):
-                print(f"Successfully created an Anthropic client for model \"{self.model_name}\"".)
+                print(f"Successfully created an Anthropic client for model \"{self.model_name}\".")
             if hasattr(self, "ollama_client"):
-                print(f"Successfully created an Ollama client for model \"{self.model_name}\"".)
+                print(f"Successfully created an Ollama client for model \"{self.model_name}\".")
         return
 
     def to_dict(self):
         d = {}
         if self.model_name:
-            d["model_name"] = self.model_name
+            d["model-name"] = self.model_name
         if self.prompt_mode:
-            d["prompt_mode"] = self.prompt_mode
+            d["prompt-mode"] = self.prompt_mode
         if self.prompt:
             d["model"] = self.prompt.to_dict()
         if self.num_incontext_examples:
-            d["num_incontext_examples"] = self.num_incontext_examples
+            d["num-incontext-examples"] = self.num_incontext_examples
         if self.temperature:
             d["temperature"] = self.temperature
         if self.seed:
             d["seed"] = self.seed
         if self.api_timeout:
-            d["api_timeout"] = self.api_timeout
+            d["api-timeout"] = self.api_timeout
         if self.response_history:
-            d["response_history"] = self.response_history
+            d["response-history"] = self.response_history
         return d
         
     def query_llm(self, instruction, scene_graph):

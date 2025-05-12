@@ -1,5 +1,5 @@
-#ifndef NLU_INTERFACE__INSTRUCTION_PANEL_HPP_
-#define NLU_INTERFACE__INSTRUCTION_PANEL_HPP_
+#ifndef NLU_INTERFACE_RVIZ__INSTRUCTION_PANEL_HPP_
+#define NLU_INTERFACE_RVIZ__INSTRUCTION_PANEL_HPP_
 
 // ROS
 #include <rviz_common/panel.hpp>
@@ -14,7 +14,7 @@
 #include <QLineEdit>
 #include <QTimer>
 
-namespace nlu_interface {
+namespace nlu_interface_rviz {
 class InstructionPanel : public rviz_common::Panel
 {
   Q_OBJECT
@@ -45,6 +45,6 @@ private Q_SLOTS:
   void publishInstruction( void );
   void publishSystemMonitor( void );
 }; // class InstructionPanel
-}  // namespace nlu_interface
+}  // namespace nlu_interface_rviz
 
-#endif  // NLU_INTERFACE__INSTRUCTION_PANEL_HPP_
+#endif  // NLU_INTERFACE_RVIZ__INSTRUCTION_PANEL_HPP_

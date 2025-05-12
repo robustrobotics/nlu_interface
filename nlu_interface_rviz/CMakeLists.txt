@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(nlu_interface)
+project(nlu_interface_rviz)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -19,7 +19,7 @@ find_package(omniplanner_msgs REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 qt5_wrap_cpp(MOC_FILES
-  include/nlu_interface/instruction_panel.hpp
+  include/nlu_interface_rviz/instruction_panel.hpp
 )
 
 add_library(instruction_panel src/instruction_panel.cpp ${MOC_FILES})
@@ -34,7 +34,7 @@ ament_target_dependencies(instruction_panel
   omniplanner_msgs
 )
 install(TARGETS instruction_panel
-        EXPORT export_nlu_interface
+        EXPORT export_nlu_interface_rviz
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
@@ -48,7 +48,7 @@ install(FILES rviz_common_plugins.xml
         DESTINATION share/${PROJECT_NAME}
 )
 ament_export_include_directories(include)
-ament_export_targets(export_nlu_interface)
+ament_export_targets(export_nlu_interface_rviz)
 pluginlib_export_plugin_description_file(rviz_common rviz_common_plugins.xml)
 
 if(BUILD_TESTING)
