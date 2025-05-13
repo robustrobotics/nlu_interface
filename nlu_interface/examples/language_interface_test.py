@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import ast
 import os
 import argparse
 import yaml
@@ -10,7 +11,9 @@ from nlu_interface.llm_interface import Prompt, IncontextExample, LLMInterface
 def main(llm_interface, scene_graph):
     new_instruction = "Spot, go to region 83"
     response = llm_interface.request_plan_specification( new_instruction, scene_graph )
-    print(response)
+    print(f"response: {response}")
+    response_dict = ast.literal_eval(response)
+    print(f"response_dict: {response_dict}")
     return
 
 if __name__ == "__main__":

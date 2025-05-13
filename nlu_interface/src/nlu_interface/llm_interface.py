@@ -1,4 +1,5 @@
 import os
+import re
 import spark_dsg
 
 # LLM Imports
@@ -37,6 +38,14 @@ prompt_modes_set = (
 
 """ Helper Methods
 """
+def parse_response( response_string ):
+    response_match = re.search(r"<Answer>(.*?)</Answer>", response_string)
+    if response_match:
+        parsed_response = response_match.group(1)
+    else:
+        raise ParsingFailure(f"Unable to parse the answer from the response: {response_string}")
+    return parsed_response
+
 def get_region_parent_of_object(object_node, scene_graph):
     # Get the parent of the object (Place)
     parent_place_id = object_node.get_parent()
@@ -303,7 +312,9 @@ class LLMInterface:
         # Prepare the prompt
         self.prompt.new_instruction = instruction
         self.prompt.scene_graph = scene_graph_to_prompt( scene_graph )
-        return self.query_llm()
+        response = self.query_llm()
+        parsed_response_content = parse_response( response.choices[0].message.content )
+        return parsed_response_content
         
     def query_llm(self):
         if not self.prompt:
