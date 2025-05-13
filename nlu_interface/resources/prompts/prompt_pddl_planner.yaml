@@ -39,7 +39,7 @@ Objects:
 Regions:
 - (id=R0, type=parking_lot)
 - (id=R1, type=dock)
-- (id=R2), type=courtyard)
+- (id=R2, type=courtyard)
 </Example 3D Scene Graph>
 "
 
