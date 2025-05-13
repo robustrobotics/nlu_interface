@@ -1,7 +1,13 @@
 import os
+import spark_dsg
+
 # LLM Imports
-#import tiktoken
 import requests
+
+# The imports below are triggered conditionally according to the required client. Leaving them commented here for visibility.
+# import openai
+# import ollama
+# import anthropic
 
 """ Exceptions
 """
@@ -29,6 +35,56 @@ prompt_modes_set = (
     "chain-of-thought",
 )
 
+""" Helper Methods
+"""
+def get_region_parent_of_object(object_node, scene_graph):
+    # Get the parent of the object (Place)
+    parent_place_id = object_node.get_parent()
+    if not parent_place_id:
+        return "none"
+    parent_place_node = scene_graph.get_node( parent_place_id )
+    parent_region_id = parent_place_node.get_parent()
+    if not parent_region_id:
+        return "none"
+    parent_region_node = scene_graph.get_node( parent_region_id )
+    return str(parent_region_node.id)
+
+def object_to_prompt(object_node, scene_graph):
+    attrs = object_node.attributes
+    symbol = str(object_node.id)
+    object_labelspace = scene_graph.metadata.get()["object_labelspace"]
+    label = object_labelspace[ str(attrs.semantic_label) ]
+    position = f"({attrs.position[0]},{attrs.position[1]})"
+    parent_region = get_region_parent_of_object(object_node, scene_graph)
+    object_prompt = f"\n-\t(id={symbol}, type={label}, pos={position}, parent_region={parent_region})"
+    return object_prompt
+
+def region_to_prompt(region_node, scene_graph):
+    attrs = region_node.attributes
+    symbol = str(region_node.id)
+    region_labelspace = scene_graph.metadata.get()["region_labelspace"]
+    label = region_labelspace[ str(attrs.semantic_label) ]
+    region_prompt = f"\n-\t(id={symbol}, type={label})"
+    return region_prompt
+
+def scene_graph_to_prompt(scene_graph):
+    # Add the objects
+    objects_prompt = ""
+    for object_node in scene_graph.get_layer(spark_dsg.DsgLayers.OBJECTS).nodes:
+        objects_prompt += object_to_prompt(object_node, scene_graph)
+    # Add the regions
+    regions_prompt = ""
+    for region_node in scene_graph.get_layer(spark_dsg.DsgLayers.ROOMS).nodes:
+        regions_prompt += region_to_prompt(region_node, scene_graph)
+    # Construct the prompt
+    scene_graph_prompt = (
+        f"<Scene Graph>"
+        f"\nObjects: {objects_prompt}"
+        f"\nRegions: {regions_prompt}"
+        f"</Scene Graph>"
+    )
+    return scene_graph_prompt
+
 """ Classes
 """
 class Prompt:
@@ -39,7 +95,7 @@ class Prompt:
         incontext_examples=None,
         new_instruction_preamble=None,
         new_instruction=None,
-        new_scene_graph=None,
+        scene_graph=None,
         response_format=None,
     ):
         self.system = system
@@ -47,14 +103,14 @@ class Prompt:
         self.incontext_examples = incontext_examples
         self.new_instruction_preamble = new_instruction_preamble
         self.new_instruction = new_instruction
-        self.new_scene_graph = new_scene_graph
+        self.scene_graph = scene_graph
         self.response_format = response_format
 
     def __repr__(self):
         return repr( self.to_dict() )
 
     @classmethod
-    def from_dict(cls, d, new_instruction=None, new_scene_graph=None):
+    def from_dict(cls, d, new_instruction=None, scene_graph=None):
         system = d["system"]
         incontext_examples_preamble = d["incontext-examples-preamble"]
         incontext_examples = [ IncontextExample.from_dict(e) for e in d["incontext-examples"] ]
@@ -64,8 +120,8 @@ class Prompt:
         # Only load the "new instruction" from the dictionary if no function arg provided
         if not new_instruction and "new-instruction" in d:
             new_instruction = d["new-instruction"]
-        if not new_scene_graph and "new-scene-graph" in d:
-            new_scene_graph = d["new-scene-graph"]
+        if not scene_graph and "scene-graph" in d:
+            scene_graph = d["scene-graph"]
 
         return cls(
             system,
@@ -73,7 +129,7 @@ class Prompt:
             incontext_examples,
             new_instruction_preamble,
             new_instruction,
-            new_scene_graph,
+            scene_graph,
             response_format,
         )
 
@@ -89,8 +145,8 @@ class Prompt:
             d["new-instruction-preamble"] = self.new_instruction_preamble
         if self.new_instruction:
             d["new-instruction"] = self.new_instruction
-        if self.new_scene_graph:
-            d["new-scene-graph"] = self.new_scene_graph
+        if self.scene_graph:
+            d["scene-graph"] = self.scene_graph
         if self.response_format:
             d["response-format"] = self.response_format
         return d
@@ -105,9 +161,9 @@ class Prompt:
         # Compose & Add the user message
         user_message_content = self.incontext_examples_preamble
         for i in range(num_incontext_examples):
-            user_message_content += "\n" + self.incontext_example[i].to_prompt()
+            user_message_content += "\n" + self.incontext_examples[i].to_prompt()
         user_message_content += self.new_instruction_preamble.format(response_format=self.response_format)
-        user_message_content += self.new_scene_graph
+        user_message_content += self.scene_graph
         user_message_content += self.new_instruction
         messages.append({"role" : "user", "content" : user_message_content})
         return messages
@@ -242,13 +298,16 @@ class LLMInterface:
         if self.response_history:
             d["response-history"] = self.response_history
         return d
+
+    def request_plan_specification(self, instruction, scene_graph):
+        # Prepare the prompt
+        self.prompt.new_instruction = instruction
+        self.prompt.scene_graph = scene_graph_to_prompt( scene_graph )
+        return self.query_llm()
         
-    def query_llm(self, instruction, scene_graph):
+    def query_llm(self):
         if not self.prompt:
             raise PromptingFailure("No prompt available in query_llm().")
-        # Set the instruction & scene graph in the prompt
-        self.prompt.new_instruction = instruction
-        self.prompt.new_scene_graph = scene_graph
         if hasattr(self, "openai_client"):
             response = self.__query_openai()
         elif hasattr(self, "anthropic_client"):
@@ -263,11 +322,12 @@ class LLMInterface:
         return response
 
     def __query_openai(self):
+        messages = self.prompt.to_openai_messages(self.num_incontext_examples)
         if self.debug:
-            print(f"Querying OpenAI Cloud API ({self.model_name}).\nCurrent Prompt: {self.prompt.to_openai()}", flush=True)
+            print(f"Querying OpenAI Cloud API ({self.model_name}).\nCurrent Prompt: {messages}", flush=True)
         response = self.openai_client.chat.completions.create(
             model = self.model_name,
-            messages = self.prompt.to_openai_messages(),
+            messages = messages,
             temperature = self.temperature,
             seed = self.seed,
         )

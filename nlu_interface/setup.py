@@ -6,11 +6,12 @@ setup(
     url="",
     author="",
     author_email="",
-    description="Central interface for planning pipeline(s)",
+    description="Language interface.",
     package_dir={"": "src"},
     packages=find_packages("src"),
     package_data={"": ["*.yaml", "*.pddl"]},
     install_requires=[
         "multipledispatch",
+        "spark_dsg",
     ],
 )

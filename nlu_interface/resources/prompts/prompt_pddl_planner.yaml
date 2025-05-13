@@ -30,7 +30,7 @@ incontext-examples-preamble: "Here are some examples of mapping from natural lan
 <Example 3D Scene Graph>
 Objects:
 - (id=O0, type=tree, pos=(-3.14,1.132), parent_region=R0)
-- (id=O1), type=vehicle, pos=(3.346,3.531), parent_region=R0)
+- (id=O1, type=vehicle, pos=(3.346,3.531), parent_region=R0)
 - (id=O2, type=door, pos=(3.335,3.482), parent_region=R0)
 - (id=O3, type=tree, pos=(4.475,-4.72), parent_region=R2)
 - (id=O4, type=vehicle, pos=(-2.51,6.63), parent_region=R1)
@@ -67,4 +67,4 @@ incontext-examples:
 
 new-instruction-preamble: "Here is a new 3D Scene graph and a new instruction for you to translate. Remember you MUST format your final answer using the defined Response Format: {response_format}."
 
-response-format: "You response MUST be dictionary of the form: {\"robot id\": \"PDDL goal\", \"robot id\": \"PDDL goal\"}. Put your answer between the XML tags <Answer> answer goes here </Answer>."
+response-format: "You response MUST be dictionary of the form: {\"robot id\": \"PDDL goal\", \"robot id\": \"PDDL goal\"}. The arguments to the predicates MUST NOT include parenthesis. For example, \"(visited-place R(1))\" is NOT correct and should instead be \"(visited-place R1)\". Put your answer between the XML tags <Answer> answer goes here </Answer>."
