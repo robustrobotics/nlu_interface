@@ -1,0 +1,82 @@
+---
+invalid_labels: [24, 29, 30]
+label_synonyms:
+  - {label: 18, synonym: 0}
+  - {label: 29, synonym: 24}
+  - {label: 22, synonym: 24}
+  - {label: 15, synonym: 24}
+  - {label: 30, synonym: 24}
+  - {label: 25, synonym: 24}
+  - {label: 27, synonym: 3}
+label_names:
+  - {label: 0, name: bathroom, name_descriptive: a bathroom}
+  - {label: 1, name: bedroom, name_descriptive: a bedroom}
+  - {label: 2, name: closet, name_descriptive: a closet}
+  - {label: 3, name: dining_room, name_descriptive: a dining_room}
+  - {label: 4, name: entryway, name_descriptive: an entryway}
+  - {label: 5, name: family_room, name_descriptive: a family room}
+  - {label: 6, name: garage, name_descriptive: a garage}
+  - {label: 7, name: hallway, name_descriptive: a hallway}
+  - {label: 8, name: library, name_descriptive: a library}
+  - {label: 9, name: laundry_room, name_descriptive: a laundry room}
+  - {label: 10, name: kitchen, name_descriptive: kitchen}
+  - {label: 11, name: living_room, name_descriptive: a living room}
+  - {label: 12, name: conference_room, name_descriptive: a conference room}
+  - {label: 13, name: lounge, name_descriptive: a lounge}
+  - {label: 14, name: office, name_descriptive: an office}
+  - {label: 15, name: porch, name_descriptive: a porch}
+  - {label: 16, name: recreation_room, name_descriptive: a recreation room}
+  - {label: 17, name: stairs, name_descriptive: a stairwell}
+  - {label: 18, name: toilet_room, name_descriptive: a toilet room}
+  - {label: 19, name: utility_room, name_descriptive: a utility room}
+  - {label: 20, name: theatre_room, name_descriptive: a theatre room}
+  - {label: 21, name: gym, name_descriptive: a gym}
+  - {label: 22, name: outdoor_area, name_descriptive: an outdoor area}
+  - {label: 23, name: balcony, name_descriptive: a balcony}
+  - {label: 24, name: unknown_room, name_descriptive: an unknown room}
+  - {label: 25, name: bar, name_descriptive: a bar}
+  - {label: 26, name: classroom, name_descriptive: a classroom}
+  - {label: 27, name: dining_booth, name_descriptive: a dining booth}
+  - {label: 28, name: spa, name_descriptive: a spa}
+  - {label: 29, name: junk, name_descriptive: a junk room}
+  - {label: 30, name: unlabeled_room, name_descriptive: an unlabeled room}
+char_synonyms:
+  - {char: 't', synonym: 'a'}
+  - {char: 'Z', synonym: 'z'}
+  - {char: 'x', synonym: 'z'}
+  - {char: 'p', synonym: 'z'}
+  - {char: '\x15', synonym: 'z'}
+  - {char: 'B', synonym: 'z'}
+  - {char: 'D', synonym: 'd'}
+char_labels:
+  - {char: 'a', label: 0}
+  - {char: 'b', label: 1}
+  - {char: 'c', label: 2}
+  - {char: 'd', label: 3}
+  - {char: 'e', label: 4}
+  - {char: 'f', label: 5}
+  - {char: 'g', label: 6}
+  - {char: 'h', label: 7}
+  - {char: 'i', label: 8}
+  - {char: 'j', label: 9}
+  - {char: 'k', label: 10}
+  - {char: 'l', label: 11}
+  - {char: 'm', label: 12}
+  - {char: 'n', label: 13}
+  - {char: 'o', label: 14}
+  - {char: 'p', label: 15}
+  - {char: 'r', label: 16}
+  - {char: 's', label: 17}
+  - {char: 't', label: 18}
+  - {char: 'u', label: 19}
+  - {char: 'v', label: 20}
+  - {char: 'w', label: 21}
+  - {char: 'x', label: 22}
+  - {char: 'y', label: 23}
+  - {char: 'z', label: 24}
+  - {char: 'B', label: 25}
+  - {char: 'C', label: 26}
+  - {char: 'D', label: 27}
+  - {char: 'S', label: 28}
+  - {char: 'Z', label: 29}
+  - {char: '\x15', label: 30}

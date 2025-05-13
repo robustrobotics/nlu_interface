@@ -1,0 +1,18 @@
+---
+invalid_labels: [0, 13]
+label_names:
+  - {label: 0, name: unknown, name_descriptive: an unknown area}
+  - {label: 1, name: building, name_descriptive: a building}
+  - {label: 2, name: road, name_descriptive: a road}
+  - {label: 3, name: offroad, name_descriptive: an offroad path with rough terrain}
+  - {label: 4, name: field, name_descriptive: a grass field}
+  - {label: 5, name: verge, name_descriptive: the edge of a road}
+  - {label: 6, name: parking_lot, name_descriptive: a parking lot}
+  - {label: 7, name: park, name_descriptive: a park}
+  - {label: 8, name: foreshore, name_descriptive: the part of a sandy beach bordering water}
+  - {label: 9, name: backshore, name_descriptive: the part of a sandy beach not bordering water}
+  - {label: 10, name: walkway, name_descriptive: a walkway}
+  - {label: 11, name: courtyard, name_descriptive: a courtyard}
+  - {label: 12, name: footing, name_descriptive: the outside edge of a building}
+  - {label: 13, name: beach, name_descriptive: the part of a beach not near the shore}
+  - {label: 14, name: intersection, name_descriptive: an intersection of multiple roads}
