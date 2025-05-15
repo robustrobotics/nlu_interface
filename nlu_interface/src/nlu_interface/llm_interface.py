@@ -32,20 +32,6 @@ class ParsingFailure(Exception):
     pass
 
 
-""" Globals
-"""
-models_map = MappingProxyType(
-    {
-        "gpt-4o": "gpt-4o-2024-08-06",
-        "gpt-4o-mini": "gpt-4o-mini-2024-07-18",
-    }
-)
-
-prompt_modes_set = (
-    "default",
-    "chain-of-thought",
-)
-
 """ Helper Methods
 """
 
