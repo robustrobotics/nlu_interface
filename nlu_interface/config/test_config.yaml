@@ -1,4 +1,5 @@
 llm_config: /colcon_ws/src/awesome_dcist_t4/nlu_interface/nlu_interface/config/llm_config.yaml
-scene_graph: /colcon_ws/scene_graphs/west_point/west_point_fused_map_wregions.json 
-object_labelspace: /colcon_ws/src/awesome_dcist_t4/nlu_interface/nlu_interface/resources/labelspaces/ade20k_mit_label_space.yaml
-region_labelspace: /colcon_ws/src/awesome_dcist_t4/nlu_interface/nlu_interface/resources/labelspaces/scene_camp_buckner_label_space.yaml
+scene_graph: /colcon_ws/scene_graphs/modern/0513_b45.json 
+#scene_graph: /colcon_ws/scene_graphs/west_point/west_point_fused_map_wregions.json 
+#object_labelspace: /colcon_ws/src/awesome_dcist_t4/nlu_interface/nlu_interface/src/nlu_interface/resources/labelspaces/ade20k_mit_label_space.yaml
+#region_labelspace: /colcon_ws/src/awesome_dcist_t4/nlu_interface/nlu_interface/src/nlu_interface/resources/labelspaces/scene_camp_buckner_label_space.yaml

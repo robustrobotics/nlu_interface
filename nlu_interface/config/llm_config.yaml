@@ -1,8 +1,9 @@
-model_name: gpt-4o
-prompt_mode: default
-prompt: /colcon_ws/src/awesome_dcist_t4/nlu_interface/nlu_interface/resources/prompts/prompt_pddl_planner.yaml
+model: gpt-4o
+mode: default
+prompt: /colcon_ws/src/awesome_dcist_t4/nlu_interface/nlu_interface/src/nlu_interface/resources/prompt_pddl_planner.yaml
 num_incontext_examples: -1
 temperature: 0.0
-seed: 100
 api_timeout: 120.0
+seed: 100
+api_key_env_var: ADT4_OPENAI_API_KEY
 debug: True
