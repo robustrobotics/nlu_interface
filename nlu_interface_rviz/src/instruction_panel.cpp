@@ -54,7 +54,7 @@ void InstructionPanel::onInitialize(){
     rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
 
     // Create the publishers & subscriptions
-    instruction_publisher_ = node->create_publisher<omniplanner_msgs::msg::LanguageGoalMsg>("/omniplanner_node/language_planner/language_goal", 10);
+    instruction_publisher_ = node->create_publisher<omniplanner_msgs::msg::LanguageGoalMsg>("omniplanner_node/language_planner/language_goal", 10);
     system_monitor_publisher_ = node->create_publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>("~/node_status", 1);
     llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>("~/llm_response", 10, std::bind(&InstructionPanel::handleLLMResponse, this, std::placeholders::_1));
     return;
