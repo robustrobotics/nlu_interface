@@ -5,6 +5,10 @@ import spark_dsg
 # LLM Imports
 import requests
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 # The imports below are triggered conditionally according to the required client. Leaving them commented here for visibility.
 # import openai
 # import ollama
@@ -61,8 +65,9 @@ def get_region_parent_of_object(object_node, scene_graph):
 def object_to_prompt(object_node, scene_graph):
     attrs = object_node.attributes
     symbol = str(object_node.id)
-    object_labelspace = scene_graph.metadata.get()["object_labelspace"]
-    label = object_labelspace[ str(attrs.semantic_label) ]
+    metadata_keys = list(map(str, scene_graph.metadata.get()['labelspaces'].keys()))
+    object_labelspace = scene_graph.metadata.get()["labelspaces"]["_l2p0"]
+    label = object_labelspace[attrs.semantic_label]
     position = f"({attrs.position[0]},{attrs.position[1]})"
     parent_region = get_region_parent_of_object(object_node, scene_graph)
     object_prompt = f"\n-\t(id={symbol}, type={label}, pos={position}, parent_region={parent_region})"
