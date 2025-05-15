@@ -42,6 +42,7 @@ protected:
     QLineEdit * p_prev_instruction_editor_;
     QLineEdit * p_instruction_editor_;
     QComboBox * p_domain_type_combo_box_;
+    QComboBox * p_robot_id_combo_box_;
     QTimer * p_timer_;
 
 private Q_SLOTS:

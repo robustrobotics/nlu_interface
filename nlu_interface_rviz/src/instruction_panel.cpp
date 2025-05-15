@@ -11,6 +11,13 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     p_domain_type_combo_box_->addItems({"default", "Pddl", "goto_points"});
     p_domain_type_combo_box_layout->addWidget( p_domain_type_combo_box_ );
 
+    // Create the layout for the robot id combo box
+    QHBoxLayout * p_robot_id_combo_box_layout = new QHBoxLayout;
+    p_robot_id_combo_box_layout->addWidget( new QLabel("Robot ID"));
+    p_robot_id_combo_box_ = new QComboBox;
+    p_robot_id_combo_box_->addItems({"spot", "hamilton", "hilbert"});
+    p_robot_id_combo_box_layout->addWidget( p_robot_id_combo_box_ );
+
     // Create the layout for the instruction field
     QHBoxLayout * p_instruction_layout = new QHBoxLayout;
     p_instruction_layout->addWidget( new QLabel("Instruction:"));
@@ -34,6 +41,7 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     // Organize the layouts vertically
     QVBoxLayout * p_layout = new QVBoxLayout;
     p_layout->addLayout( p_domain_type_combo_box_layout );
+    p_layout->addLayout( p_robot_id_combo_box_layout );
     p_layout->addLayout( p_instruction_layout );
     p_layout->addLayout( p_prev_instruction_layout );
     p_layout->addLayout( p_llm_response_layout );
@@ -68,7 +76,7 @@ void InstructionPanel::handleLLMResponse(std_msgs::msg::String const & msg ){
 void InstructionPanel::publishInstruction( void ){
     // Construct and publish the instruction text as a String message 
     auto msg = omniplanner_msgs::msg::LanguageGoalMsg();
-    msg.robot_id = "NO ONE";
+    msg.robot_id = p_robot_id_combo_box_->currentText().toStdString();
     msg.command = p_instruction_editor_->text().toStdString();
     msg.domain_type = p_domain_type_combo_box_->currentText().toStdString();
     instruction_publisher_->publish( msg );
