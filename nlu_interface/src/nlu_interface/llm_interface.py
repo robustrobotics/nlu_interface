@@ -78,7 +78,7 @@ def object_to_prompt(object_node, scene_graph):
 def region_to_prompt(region_node, scene_graph):
     attrs = region_node.attributes
     symbol = str(region_node.id)
-    region_labelspace = scene_graph.get_labelspace(3,1)
+    region_labelspace = scene_graph.get_labelspace(4,0)
     if not region_labelspace:
         raise PromptingFailure("No available region labelspace")
     semantic_type = region_labelspace.get_category( attrs.semantic_label )
