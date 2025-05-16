@@ -3,6 +3,7 @@ system: "Your task is to map from natural language instructions to Planning Doma
 <Robots>
 Spot: Spot is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'spot'.
 Jasper: Jasper is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'jasper'.
+Hilbert: Hilbert is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'hilbert'.
 </Robots>
 
 <Scene Graph Description>
@@ -50,6 +51,8 @@ incontext-examples:
   example-output: "{\"jasper\": \"(visited-object O1)\"}"
 - example-input: "Jasper, head to place 100."
   example-output: "{\"jasper\": \"(visited-place P100)\"}"
+- example-input: "Hilbert, head to region 21."
+  example-output: "{\"hilbert\": \"(visited-place R21)\"}"
 - example-input: "Spot, drive over to the door and visit the boat."
   example-output: "{\"spot\": \"(and (visited-object O2) (visited-object O5))\"}"
 - example-input: "Spot, walk over to the door or end up by the boat."
