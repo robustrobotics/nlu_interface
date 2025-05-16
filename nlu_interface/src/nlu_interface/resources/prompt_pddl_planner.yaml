@@ -14,9 +14,15 @@ Region Layer: The Region Layer contains Regions that exist in the world. Each Re
 </Scene Graph Description>
 
 <PDDL Domain>
-    The PDDL domain consists of two main predicates that are described below.
-    (visited-place ?x): This predicate indicates that a robot must visit '?x', where '?x' is a placeholder for either a Region ID or a Place ID.
-    (visited-object ?o): This predicate indicates that a robot must visit '?o', wher '?o' is a placeholder for an Object ID.
+    The PDDL domain consists of the following predicates.
+    (at-place ?x): This predicate indicates that a robot must be at '?x', where '?x' is a placeholder for either a Region ID or a Place ID. This means that robot will be at '?x' at the end of the plan.
+    (visited-place ?x): This predicate indicates that a robot must visit '?x', where '?x' is a placeholder for either a Region ID or a Place ID. This means that the robot must have visited '?x' in the plan, but it does not necessarily need to end there.
+
+    (at-object ?o): This predicate indicates that a robot must be at '?o?, where '?o' is a placeholder for an Object ID. This means that the robot will be at '?o' at the end of the plan.
+    (visited-object ?o): This predicate indicates that a robot must visit '?o', where '?o' is a placeholder for an Object ID. This means that the robot must have visited '?o' in the plan, bt it does not necessarily need to end there.
+
+    (suspicious ?o): This predicate indicates that '?o' is suspicious, where '?o' is a placeholder for an Object ID. A robot can make an object not suspicious by inspecting or taking a closer look at it.
+    (safe ?o): This predicate indicates that '?o' is safe, where '?o' is a placeholder for an Object ID. A robot can make an unsafe object safe by inspecting it.
 
     You can compose PDDL goal predicates into more complex goals using the following operators:
     not: the 'not' operator negates the truth value of the predicate. For example '(not (visited-place r1))' means Region 'r1' should not be visited.
@@ -65,6 +71,10 @@ incontext-examples:
   example-output: "{\"hamilton\": \"(visited-object O1)\"}"
 - example-input: "Euclid, move to the vehicle on the left."
   example-output: "{\"euclid\": \"(visited-object O4)\"}"
+- example-input: "Euclid, inspect vehicle on the left."
+  example-output: "{\"euclid\": \"(not (suspicious O4))\"}"
+- example-input: "Hamilton, get a closer look at the cars."
+  example-output: "{\"hamilton\": \"(and (not (suspicious O1)) (not (suspicious O4)))\"}"
 - example-input: "I need one of you to go to the parking lot and the other to head to the dock."
   example-output: "{\"euclid\": \"(visited-place R0)\", \"hamilton\": \"(visited-place R1)\"}"
 
