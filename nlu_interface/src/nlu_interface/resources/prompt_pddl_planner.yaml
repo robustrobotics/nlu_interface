@@ -1,8 +1,8 @@
 system: "Your task is to map from natural language instructions to Planning Domain Definition Language (PDDL) goal predicates assigned to individual robots within a robot team. The robots may have different capabilities. If the instruction does not explicitly assign tasks to specific robots, you are responsible for deciding which robot completes which tasks. You will be provided with a description of the world known as a 3D Scene Graph, and you should generate grounded PDDL goal predicates that use entities from the scene graph as arguments. Below are descriptions of (1) the available robots in the team (delimited by XML tags: <Robots> description of robots </Robots>), (2) a description of 3D scene graphs (delimited by XML tags: <Scene Graph Description> description of 3D Scene Graphs </Scene Graph Description>), and (3) the PDDL domain predicates (delimited by XML tags: <PDDL Domain> description of the domain </PDDL Domain>).
 
 <Robots>
-Spot: Spot is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'spot'.
-Jasper: Jasper is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'jasper'.
+Euclid: Euclid is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'euclid'.
+Hamilton: Hamilton is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'hamilton'.
 Hilbert: Hilbert is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'hilbert'.
 </Robots>
 
@@ -45,28 +45,28 @@ Regions:
 "
 
 incontext-examples:
-- example-input: "Jasper, go to object 1."
-  example-output: "{\"jasper\": \"(visited-object O1)\"}"
-- example-input: "Jasper, move to o1."
-  example-output: "{\"jasper\": \"(visited-object O1)\"}"
-- example-input: "Jasper, head to place 100."
-  example-output: "{\"jasper\": \"(visited-place P100)\"}"
+- example-input: "Hamilton, go to object 1."
+  example-output: "{\"hamilton\": \"(visited-object O1)\"}"
+- example-input: "Hamilton, move to o1."
+  example-output: "{\"hamilton\": \"(visited-object O1)\"}"
+- example-input: "Hamilton, head to place 100."
+  example-output: "{\"hamilton\": \"(visited-place P100)\"}"
 - example-input: "Hilbert, head to region 21."
   example-output: "{\"hilbert\": \"(visited-place R21)\"}"
-- example-input: "Spot, drive over to the door and visit the boat."
-  example-output: "{\"spot\": \"(and (visited-object O2) (visited-object O5))\"}"
-- example-input: "Spot, walk over to the door or end up by the boat."
-  example-output: "{\"spot\": \"(or (visited-object O2) (visited-object O5))\"}"
-- example-input: "Spot, head over to the door. Jasper, move to the boat."
-  example-output: "{\"spot\": \"(visited-object O2)\", \"jasper\": \"(visited-object O5)\"}"
-- example-input: "Spot, could you navigate to the vehicle on the dock?"
-  example-output: "{\"spot\": \"(visited-object O4)\"}"
-- example-input: "Jasper, head to the rightmost vehicle."
-  example-output: "{\"jasper\": \"(visited-object O1)\"}"
-- example-input: "Spot, move to the vehicle on the left."
-  example-output: "{\"spot\": \"(visited-object O4)\"}"
+- example-input: "Euclid, drive over to the door and visit the boat."
+  example-output: "{\"euclid\": \"(and (visited-object O2) (visited-object O5))\"}"
+- example-input: "Euclid, walk over to the door or end up by the boat."
+  example-output: "{\"euclid\": \"(or (visited-object O2) (visited-object O5))\"}"
+- example-input: "Euclid, head over to the door. Hamilton, move to the boat."
+  example-output: "{\"euclid\": \"(visited-object O2)\", \"hamilton\": \"(visited-object O5)\"}"
+- example-input: "Euclid, could you navigate to the vehicle on the dock?"
+  example-output: "{\"euclid\": \"(visited-object O4)\"}"
+- example-input: "Hamilton, head to the rightmost vehicle."
+  example-output: "{\"hamilton\": \"(visited-object O1)\"}"
+- example-input: "Euclid, move to the vehicle on the left."
+  example-output: "{\"euclid\": \"(visited-object O4)\"}"
 - example-input: "I need one of you to go to the parking lot and the other to head to the dock."
-  example-output: "{\"spot\": \"(visited-place R0)\", \"jasper\": \"(visited-place R1)\"}"
+  example-output: "{\"euclid\": \"(visited-place R0)\", \"hamilton\": \"(visited-place R1)\"}"
 
 new-instruction-preamble: "Here is a new 3D Scene graph and a new instruction for you to translate. Remember you MUST format your final answer using the defined Response Format: {response_format}."
 
