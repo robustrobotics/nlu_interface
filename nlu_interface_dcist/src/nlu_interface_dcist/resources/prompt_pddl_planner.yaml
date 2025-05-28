@@ -33,7 +33,7 @@ Region Layer: The Region Layer contains Regions that exist in the world. Each Re
 Given a 3D Scene Graph and an instruction, you must generate PDDL goal predicates associated with the instruction and assign those goals to specific robots. You MUST format your final answer using the defined response format {response_format}.
 "
 
-incontext-examples-preamble: "Here are some examples of mapping from natural language instructions to PDDL goals paired with robot IDs. Each example uses the 3D scene graph below. Note that this 3D scene graph is just for these examples and you should NOT use this when answering the new instruction.
+incontext_examples_preamble: "Here are some examples of mapping from natural language instructions to PDDL goals paired with robot IDs. Each example uses the 3D scene graph below. Note that this 3D scene graph is just for these examples and you should NOT use this when answering the new instruction.
 <Example 3D Scene Graph>
 Objects:
 - (id=O0, type=tree, pos=(-3.14,1.132), parent_region=R0)
@@ -50,34 +50,34 @@ Regions:
 </Example 3D Scene Graph>
 "
 
-incontext-examples:
-- example-input: "Hamilton, go to object 1."
-  example-output: "{\"hamilton\": \"(visited-object O1)\"}"
-- example-input: "Hamilton, move to o1."
-  example-output: "{\"hamilton\": \"(visited-object O1)\"}"
-- example-input: "Hamilton, head to place 100."
-  example-output: "{\"hamilton\": \"(visited-place P100)\"}"
-- example-input: "Hilbert, head to region 21."
-  example-output: "{\"hilbert\": \"(visited-place R21)\"}"
-- example-input: "Euclid, drive over to the door and visit the boat."
-  example-output: "{\"euclid\": \"(and (visited-object O2) (visited-object O5))\"}"
-- example-input: "Euclid, walk over to the door or end up by the boat."
-  example-output: "{\"euclid\": \"(or (visited-object O2) (visited-object O5))\"}"
-- example-input: "Euclid, head over to the door. Hamilton, move to the boat."
-  example-output: "{\"euclid\": \"(visited-object O2)\", \"hamilton\": \"(visited-object O5)\"}"
-- example-input: "Euclid, could you navigate to the vehicle on the dock?"
-  example-output: "{\"euclid\": \"(visited-object O4)\"}"
-- example-input: "Hamilton, head to the rightmost vehicle."
-  example-output: "{\"hamilton\": \"(visited-object O1)\"}"
-- example-input: "Euclid, move to the vehicle on the left."
-  example-output: "{\"euclid\": \"(visited-object O4)\"}"
-- example-input: "Euclid, inspect vehicle on the left."
-  example-output: "{\"euclid\": \"(not (suspicious O4))\"}"
-- example-input: "Hamilton, get a closer look at the cars."
-  example-output: "{\"hamilton\": \"(and (not (suspicious O1)) (not (suspicious O4)))\"}"
-- example-input: "I need one of you to go to the parking lot and the other to head to the dock."
-  example-output: "{\"euclid\": \"(visited-place R0)\", \"hamilton\": \"(visited-place R1)\"}"
+incontext_examples:
+- example_input: "Hamilton, go to object 1."
+  example_output: "{\"hamilton\": \"(visited-object O1)\"}"
+- example_input: "Hamilton, move to o1."
+  example_output: "{\"hamilton\": \"(visited-object O1)\"}"
+- example_input: "Hamilton, head to place 100."
+  example_output: "{\"hamilton\": \"(visited-place P100)\"}"
+- example_input: "Hilbert, head to region 21."
+  example_output: "{\"hilbert\": \"(visited-place R21)\"}"
+- example_input: "Euclid, drive over to the door and visit the boat."
+  example_output: "{\"euclid\": \"(and (visited-object O2) (visited-object O5))\"}"
+- example_input: "Euclid, walk over to the door or end up by the boat."
+  example_output: "{\"euclid\": \"(or (visited-object O2) (visited-object O5))\"}"
+- example_input: "Euclid, head over to the door. Hamilton, move to the boat."
+  example_output: "{\"euclid\": \"(visited-object O2)\", \"hamilton\": \"(visited-object O5)\"}"
+- example_input: "Euclid, could you navigate to the vehicle on the dock?"
+  example_output: "{\"euclid\": \"(visited-object O4)\"}"
+- example_input: "Hamilton, head to the rightmost vehicle."
+  example_output: "{\"hamilton\": \"(visited-object O1)\"}"
+- example_input: "Euclid, move to the vehicle on the left."
+  example_output: "{\"euclid\": \"(visited-object O4)\"}"
+- example_input: "Euclid, inspect vehicle on the left."
+  example_output: "{\"euclid\": \"(not (suspicious O4))\"}"
+- example_input: "Hamilton, get a closer look at the cars."
+  example_output: "{\"hamilton\": \"(and (not (suspicious O1)) (not (suspicious O4)))\"}"
+- example_input: "I need one of you to go to the parking lot and the other to head to the dock."
+  example_output: "{\"euclid\": \"(visited-place R0)\", \"hamilton\": \"(visited-place R1)\"}"
 
-new-instruction-preamble: "Here is a new 3D Scene graph and a new instruction for you to translate. Remember you MUST format your final answer using the defined Response Format: {response_format}."
+instruction_preamble: "Here is a new 3D Scene graph and a new instruction for you to translate. Remember you MUST format your final answer using the defined Response Format: {response_format}."
 
-response-format: "You response MUST be dictionary of the form: {\"robot id\": \"PDDL goal\", \"robot id\": \"PDDL goal\"}. The arguments to the predicates MUST NOT include parenthesis. For example, \"(visited-place R(1))\" is NOT correct and should instead be \"(visited-place R1)\". Put your answer between the XML tags <Answer> answer goes here </Answer>."
+response_format: "You response MUST be dictionary of the form: {\"robot id\": \"PDDL goal\", \"robot id\": \"PDDL goal\"}. The arguments to the predicates MUST NOT include parenthesis. For example, \"(visited-place R(1))\" is NOT correct and should instead be \"(visited-place R1)\". Put your answer between the XML tags <Answer> answer goes here </Answer>."
