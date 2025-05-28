@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import ast
+import re
 
 import spark_dsg
 from ruamel.yaml import YAML
@@ -10,6 +11,14 @@ from nlu_interface.prompt import Prompt, DefaultPrompt
 from nlu_interface.interface import OpenAIWrapper
 
 yaml = YAML(typ="safe")
+
+def parse_response(response_string) -> str:
+    response_match = re.search(r"<Answer>(.*?)</Answer>", response_string)
+    if response_match:
+        parsed_response = response_match.group(1)
+    else:
+        raise ValueError(f"Unable to parse the answer from the response: {response_string}")
+    return parsed_response
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -91,6 +100,12 @@ if __name__ == "__main__":
     print("Querying OpenAI...")
     response = openai_wrapper._query()
     print(f"Response: {response}")
+    print("Success!")
+
+    # Parse the response
+    print("Parsing the response...")
+    answer = parse_response(response.output[0].content[0].text)
+    print(f"Answer: {answer}")
     print("Success!")
 
     exit(0)
