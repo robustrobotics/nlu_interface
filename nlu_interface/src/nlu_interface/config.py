@@ -41,4 +41,30 @@ class OpenAIConfig(LLMConfig):
 class OllamaConfig(LLMConfig):
     ollama_url: str = "http://localhost:11434"
 
+@dataclass
+class AnthropicBedrockConfig(LLMConfig):
+    aws_region: str = ""
+    access_key_env_var: str = ""
+    secret_key_env_var: str = ""
 
+    def resolve_access_key(self) -> str:
+        if self.access_key_env_var:
+            access_key = os.getenv(self.access_key_env_var)
+        else:
+            self.access_key_env_var = "AWS_ACCESS_KEY"
+            logger.warning(f"No Access key env var provided; defaulting to \"{self.access_key_env_var}\".")
+            access_key = os.getenv(self.access_key_env_var)
+        if not access_key:
+            raise ValueError(f"Access key not found for \"{self.access_key_env_var}\"")
+        return access_key
+
+    def resolve_secret_key(self) -> str:
+        if self.secret_key_env_var:
+            secret_key = os.getenv(self.secret_key_env_var)
+        else:
+            self.secret_key_env_var = "AWS_SECRET_KEY"
+            logger.warning(f"No Secret key env var provided; defaulting to \"{self.secret_key_env_var}\".")
+            secret_key = os.getenv(self.secret_key_env_var)
+        if not secret_key:
+            raise ValueError(f"Secret key not found for \"{self.secret_key_env_var}\"")
+        return secret_key
