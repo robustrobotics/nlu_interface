@@ -118,3 +118,37 @@ class DefaultPrompt(Prompt):
             instruction_string += self.instruction
         user_string = incontext_examples_string + instruction_string
         return system_string, user_string
+
+    def to_ollama(self, num_incontext_examples: int) -> Tuple[str, str]:
+        """Assumes that both system and instruction will be templated to take a response_format; tries to fall back to empty strings"""
+        self.validate(num_incontext_examples)
+        # Construct the system message string
+        system_string = ""
+        if self.system:
+            if self.response_format and ("{response_format}" in self.system):
+                system_string = self.system.format(
+                    response_format=self.response_format
+                )
+            else:
+                system_string = self.system
+        # Compose the incontext examples string
+        incontext_examples_string = ""
+        if self.incontext_examples_preamble:
+            incontext_examples_string = self.incontext_examples_preamble
+            for i in range(num_incontext_examples):
+                incontext_examples_string += "\n" + str(self.incontext_examples[i])
+        # Compose the instruction string
+        instruction_string = ""
+        if self.instruction_preamble:
+            if self.response_format and ("{response_format}" in self.instruction_preamble):
+                instruction_string = self.instruction_preamble.format(
+                    response_format=self.response_format
+                )
+            else:
+                instruction_string = self.instruction_preamble
+        if self.instruction:
+            instruction_string += self.instruction
+        user_string = incontext_examples_string + instruction_string
+        full_sting = system_string + "\n" + user_string
+        return full_sting
+            

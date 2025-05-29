@@ -4,10 +4,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 from nlu_interface.prompt import Prompt, DefaultPrompt
-from nlu_interface.config import LLMConfig, OpenAIConfig
+from nlu_interface.config import LLMConfig, OpenAIConfig, OllamaConfig
 
 import openai
 from openai import APIResponse
+
+import ollama
 
 P = TypeVar("P", bound=Prompt) # Prompt Type
 C = TypeVar("C", bound=LLMConfig) # Config Type
@@ -87,3 +89,60 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
         )
         if self.debug:
             logger.debug(f"Created an OpenAI client for model {self.model}.")
+
+
+class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
+    
+    def __init__(
+        self,
+        config: OllamaConfig,
+        prompt: P,
+    ):
+        super().__init__(config, prompt)
+        self.ollama_url = config.ollama_url
+        
+        self._create_client()
+        self.valid_model_names = self._get_model_names()
+        print(f"Valid model names: {self.valid_model_names}")
+        self.valid_prompt_modes = ("default")
+        
+        # Validate the configuration
+        config.validate(
+            valid_model_names=self.valid_model_names,
+            valid_prompt_modes=self.valid_prompt_modes
+        )
+        
+        # Create the Ollama client
+        self._create_client()
+        
+    def _create_client(self):
+        self.client = ollama.Client(
+            host=self.ollama_url,
+        )
+        if self.debug:
+            logger.debug(f"Created an Ollama client for url {self.ollama_url}.")
+            
+    def _get_model_names(self) -> List[str]:
+        model_list = self.client.list()
+        if model_list['models']:
+            return [model['model'] for model in model_list['models']]
+        else:
+            raise ValueError("No models found in Ollama client. Please check your Ollama server connection.")
+        
+    def _query(self) -> APIResponse:
+        if not self.prompt:
+            raise ValueError("No prompt available in _query().")
+        prompt = self.prompt.to_ollama(self.num_incontext_examples)
+        if self.debug:
+            logger.debug(
+                f"Querying Ollama API ({self.model}).\nCurrent Prompt: {self.prompt.render(self.num_incontext_examples)}"
+            )
+
+        response = self.client.generate(
+            model=self.model,
+            prompt=prompt
+        )
+        self.response_history.append(response)
+        return response
+        
+        

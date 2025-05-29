@@ -36,3 +36,9 @@ class OpenAIConfig(LLMConfig):
         if not api_key:
             raise ValueError(f"API Key not found for \"{self.api_key_env_var}\"")
         return api_key
+    
+@dataclass
+class OllamaConfig(LLMConfig):
+    ollama_url: str = "http://localhost:11434"
+
+
