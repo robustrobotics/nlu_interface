@@ -103,6 +103,8 @@ def main(llm_interface, instructions):
             )
         )
         count += 1
+        if count == 2:
+            break
     # Export the results to JSON
     timestr = time.strftime("%Y%m%d-%H%M%S")
     results_filepath = f"/tmp/results-{llm_interface.model}-{timestr}.json"

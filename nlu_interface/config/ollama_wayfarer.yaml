@@ -1,7 +1,7 @@
-model: deepseek-r1:8b
+model: gemma3:27b
 prompt_mode: default
 prompt_type: default
-num_incontext_examples: -1
+num_incontext_examples: 3
 temperature: 0.0
-ollama_url: http://localhost:11434
+ollama_url: http://wayfarer.csail.mit.edu:11434
 debug: True

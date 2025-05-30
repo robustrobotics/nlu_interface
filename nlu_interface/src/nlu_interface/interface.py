@@ -122,6 +122,7 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
         self.client = ollama.Client(
             host=self.ollama_url,
         )
+        print(f"Created an Ollama client for url {self.ollama_url}.")
         if self.debug:
             logger.debug(f"Created an Ollama client for url {self.ollama_url}.")
             
@@ -146,7 +147,7 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
             prompt=prompt
         )
         self.response_history.append(response)
-        return response
+        return response['response'], response
         
 class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
     valid_model_names = (
