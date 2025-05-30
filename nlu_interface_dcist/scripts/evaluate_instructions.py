@@ -35,6 +35,7 @@ class Result:
             "response" : self.response,
             "model" : self.model,
         }
+        return d
 
 @dataclass
 class Answer:
@@ -42,8 +43,7 @@ class Answer:
     goal: List[float] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, d):
-        uid = d["id"]
+    def from_dict(cls, d, uid):
         goal = [ x for x in d["goal"] ]
         return cls(uid=uid, goal=goal)
 
@@ -57,7 +57,7 @@ class Instruction:
     def from_dict(cls, d):
         uid = d["id"]
         text = d["instruction"]
-        answer = [ Answer.from_dict(a) for a in d["answer"] ]
+        answer = [ Answer.from_dict(a, uid) for a in d["answer"] ]
         return cls(uid=uid, text=text, answer=answer)
 
 def parse_response(response_string) -> str:
@@ -68,6 +68,8 @@ def parse_response(response_string) -> str:
         raise ValueError(f"Unable to parse the answer from the response: {response_string}")
     return parsed_response
 
+import time  # Import the time module for measuring runtime
+
 def main(llm_interface, instructions):
     print("Start of the evaluation program.")
     count = 0
@@ -76,28 +78,33 @@ def main(llm_interface, instructions):
         print(f"Instruction {count} of {len(instructions)}")
         llm_interface.prompt.instruction = instruction.text
         print("Querying...")
-        response, response_content = llm_interface._query()
+        start_time = time.time()  # Start the timer
+        output, response = llm_interface._query()
+        end_time = time.time()  # End the timer
+        runtime = end_time - start_time  # Calculate runtime
         print("Parsing...")
-        parsed_answer = parse_response( response_content )
+        parsed_answer = parse_response(output)
         print("Logging...")
         results.append(
             Result(
                 uid=instruction.uid,
                 ground_truth=str(instruction.answer),
                 answer=parsed_answer,
-                runtime=TODO,
-                prompt=llm_interface.prompt.render(),
+                runtime=runtime,
+                prompt=llm_interface.prompt.render(3),
                 response=str(response),
                 model=llm_interface.model,
             )
-        ) 
+        )
         count += 1
+        if count == 2:
+            break
     # Export the results to JSON
     timestr = time.strftime("%Y%m%d-%H%M%S")
     results_filepath = f"/tmp/results-{llm_interface.model}-{timestr}.json"
-    results_dict = [ result.to_dict() for result in results ]
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(results_dict, f, ensure_ascii=False, indent=4)
+    results_dict = [result.to_dict() for result in results]
+    with open(results_filepath, 'w', encoding='utf-8') as file:
+        json.dump(results_dict, file, ensure_ascii=False, indent=4)
     return
     
         
@@ -109,13 +116,15 @@ if __name__ == "__main__":
     parser.add_argument("--instruction_files", nargs="+", required=True)
     args = parser.parse_args()
 
-    import pdb
-    breakpoint()
+    # import pdb
+    # breakpoint()
 
     # Load the prompt
     with open(args.prompt, "r") as file:
         prompt_dict = yaml.load(file)
     prompt = DefaultPrompt(**prompt_dict)
+    
+    print(f"Loaded prompt: {prompt}")
 
     # Load the config
     with open(args.llm_config, "r") as file:
@@ -123,6 +132,7 @@ if __name__ == "__main__":
 
     # Construct the interface
     interface_type = llm_config_dict["interface_type"]
+    print(f"Interface type: {interface_type}")
     del llm_config_dict["interface_type"]
     llm_interface = None
     match interface_type:

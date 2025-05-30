@@ -83,7 +83,8 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
             temperature=self.temperature,
         )
         self.response_history.append(response)
-        return response
+        output_text = response.output[0].content[0].text
+        return output_text, response
 
     def _create_client(self):
         self.client = openai.OpenAI(
