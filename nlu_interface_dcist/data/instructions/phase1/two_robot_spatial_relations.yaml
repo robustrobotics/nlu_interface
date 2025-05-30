@@ -1,0 +1,86 @@
+- id: 70
+  instruction: "Husky, move between the manhole and the rundown building. Jackal, go between the barracks and the rundown building."
+  answer:
+    - id: rrghusky
+      goal: [-89.85, -92.615]
+    - id: rrgjackal
+      goal: [-97.0, -89.5]
+- id: 71
+  instruction: "Jackal, go between the barracks and the rundown building. Enyo, move to the location to the right of the HQ side of the bridge."
+  answer:
+    - id: rrgjackal
+      goal: [-97.0, -89.5]
+    - id: enyo
+      goal: [-22.0, 28.0]
+      notes: the hq
+- id: 72
+  instruction: "Husky, go to the left side of the cadet barbershop. Enyo, move near, but not exactly to, the red barn."
+  answer:
+    - id: rrghusky
+      goal: [-102.0, -8.0]
+      note: Not the actual cadet barber shop location; semicircle to the left of it
+    - id: enyo
+      goal: [-53.0, 82.0]
+      note: Not the actual red barn; a circle around it
+- id: 73
+  instruction: "Enyo, go to the right side of the activity shack. Husky, go to the landmark farthest from the red barn."
+  answer:
+    - id: enyo
+      goal: [-109.0, -25.2]
+      note: Not the actual activity shack; semicircle to the right of it
+    - id: rrghusky
+      goal: [-76.0, -110.0]
+      notes: the rundown building
+- id: 74
+  instruction: "Jackal, move near, but not exactly to, the red barn. Enyo, head to the landmark closest to the manhole."
+  answer:
+    - id: rrgjackal
+      goal: [-53.0, 82.0]
+      note: Not the actual red barn; a circle around it
+    - id: enyo
+      goal: [-118.0, -69.0]
+      note: the barracks
+- id: 75
+  instruction: "Husky, move to the location to the right of the HQ side of the bridge. Enyo, go to the landmark that is to the left of the tree."
+  answer:
+    - id: rrghusky
+      goal: [-22.0, 28.0]
+      notes: the hq
+    - id: enyo
+      goal: [-140.7, -44.66]
+      note: the cafeteria
+- id: 76
+  instruction: "Enyo, walk to the location nearest to the fuel tank. Husky, go between the barracks and the rundown building."
+  answer:
+    - id: enyo
+      goal: [-53.0, 82.0]
+      note: the red barn
+    - id: rrghusky
+      goal: [-97.0, -89.5]
+- id: 77
+  instruction: "Jackal, go to the landmark that is to the left of the tree. Enyo, go to the left side of the cadet barbershop."
+  answer:
+    - id: rrgjackal
+      goal: [-140.7, -44.66]
+      note: the cafeteria
+    - id: enyo
+      goal: [-102.0, -8.0]
+      note: Not the actual cadet barber shop location; semicircle to the left of it
+- id: 78
+  instruction: "Jackal, move to the location to the right of the HQ side of the bridge. Husky, move near, but not exactly to, the red barn."
+  answer:
+    - id: rrgjackal
+      goal: [-22.0, 28.0]
+      notes: the hq
+    - id: rrghusky
+      goal: [-53.0, 82.0]
+      note: Not the actual red barn; a circle around it
+- id: 79
+  instruction: "Jackal, go to the landmark farthest from the red barn. Husky, head to the location nearest to the fuel tank."
+  answer:
+    - id: rrgjackal
+      goal: [-76.0, -110.0]
+      notes: the rundown building
+    - id: rrghusky
+      goal: [-53.0, 82.0]
+      note: the red barn

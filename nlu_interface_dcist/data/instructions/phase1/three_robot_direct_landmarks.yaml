@@ -1,0 +1,90 @@
+- id: 20
+  instruction: "Husky, go to the Cadet Field Training Headquarters. Enyo, head over to the bathroom. Jackal, get to the fuel tank."
+  answer:
+    - id: rrghusky
+      goal: [-22.0, 28.0] 
+    - id: enyo
+      goal: [-83.0, -32.0]
+    - id: rrgjackal
+      goal: [-55.0, 81.0]
+- id: 21
+  instruction: "Jackal, take a drive to the cafeteria. Husky, travel to the cadet barbershop. Enyo, walk to the rundown building."
+  answer:
+    - id: rrgjackal
+      goal: [-140.7, -44.66]  
+    - id: rrghusky
+      goal: [-102.0, -8.0]
+    - id: enyo
+      goal: [-76.0, -110.0]
+- id: 22
+  instruction: "Enyo, move to the manhole. Jackal, go to the rundown building. Husky, head to the red barn."
+  answer:
+    - id: enyo
+      goal: [-103.7, -75.23]
+    - id: rrgjackal
+      goal: [-76.0, -110.0]
+    - id: rrghusky
+      goal: [-55.0, 81.0]
+- id: 23
+  instruction: "Husky, move to the activity shack. Jackal, head over to the bathroom. Enyo, get to the parking lot"
+  answer:
+    - id: rrghusky
+      goal: [-109.0, -25.2]
+    - id: rrgjackal
+      goal: [-83.0, -32.0]
+    - id: enyo
+      goal: [-84.8, -46.16]
+- id: 24
+  instruction: "Enyo, take a walk to the fuel tank. Husky, go to the cafeteria. Jackal, head to the manhole"
+  answer:
+    - id: enyo
+      goal: [-55.0, 81.0]
+    - id: rrghusky
+      goal: [-140.7, -44.66]  
+    - id: rrgjackal
+      goal: [-103.7, -75.23]
+- id: 25
+  instruction: "Enyo, head to the red barn. Jackal, travel to the cadet barbershop. Husky, move to the bathroom."
+  answer:
+    - id: enyo
+      goal: [-55.0, 81.0]
+    - id: rrgjackal
+      goal: [-102.0, -8.0]
+    - id: rrghusky
+      goal: [-83.0, -32.0]
+- id: 26
+  instruction: "Husky, go to the parking lot. Jackal, get to the manhole. Enyo, travel to the activity shack."
+  answer:
+    - id: rrghusky
+      goal: [-84.8, -46.16]
+    - id: rrgjackal
+      goal: [-103.7, -75.23]
+    - id: enyo
+      goal: [-109.0, -25.2]
+- id: 27
+  instruction: "Enyo, travel to the cadet barbershop. Husky, move over to the activity shack. Jackal, get to the Cadet Field Training Headquarters."
+  answer:
+    - id: enyo
+      goal: [-102.0, -8.0]
+    - id: rrghusky
+      goal: [-109.0, -25.2]
+    - id: rrgjackal
+      goal: [-22.0, 28.0] 
+- id: 28
+  instruction: "Jackal, move to the Cadet Field Training Headquarters. Enyo, move to the rundown building. Husky, go to the cadet barbershop."
+  answer:
+    - id: rrgjackal
+      goal: [-22.0, 28.0] 
+    - id: enyo
+      goal: [-76.0, -110.0]
+    - id: rrghusky
+      goal: [-102.0, -8.0]
+- id: 29
+  instruction: "Jackal, head to the parking lot. Husky, go to the bathroom. Enyo, walk to the red barn."
+  answer:
+    - id: rrgjackal
+      goal: [-84.8, -46.16]
+    - id: rrghusky
+      goal: [-83.0, -32.0]
+    - id: enyo
+      goal: [-55.0, 81.0]

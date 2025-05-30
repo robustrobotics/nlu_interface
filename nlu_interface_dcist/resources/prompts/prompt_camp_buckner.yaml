@@ -1,0 +1,17 @@
+system: "Your task is to map from natural language instructions to robot IDs and (x,y) coordinate goals in the world. Given an instruction, tell me which robot goes to which (x,y) coordinate. The world model contains landmarks and robots. Each landmark has an ID, a type, and a position given in (x,y) coordinates. Each robot has an ID. {response_format}"
+
+incontext_examples_preamble: "The following is a set of examples mapping instructions to robot IDs and coordinate goals using the provided world.\n<World>landmark[id=Fuel Tank,semantics=fuel,pos(-55.0,81.0)],landmark[id=Red Barn,semantics=building,pos(-53.0,82.0)],landmark[id=Bridge Headquarters Side ,semantics=bridge,pos(-66.0,38.0)],landmark[id=Bridge Center,semantics=bridge,pos(-81.0,12.0)],landmark[id=Cadet Barber Shop,semantics=building,pos(-102.0,-8.0)],landmark[id=Activity Shack,semantics=building,pos(-109.0,-25.2)],landmark[id=Manhole,semantics=road,pos(-103.7,-75.23)],landmark[id=Rundown Building ,semantics=building,pos(-76.0,-110.0)],landmark[id=Barracks,semantics=building,pos(-118.0,-69.0)],landmark[id=Bathroom,semantics=building,pos(-83.0,-32.0)],landmark[id=Parking_Lot,semantics=parking,pos(-84.8,-46.16)],landmark[id=Cafeteria,semantics=building,pos(-140.7,-44.66)],landmark[id=Cadet Field Training Headquarters,semantics=building,pos(-22.0,28.0)],landmark[id=Tree with Sign,semantics=tree,pos(-112.29,-46.68)]</World>"
+
+incontext_examples:
+- example_input: "Husky, drive to the barn."
+  example_output: "<Answer> {\"rrghusky\": [-53.0,82.0]} </Answer>"
+- example_input: "Jackal, go to the barber shop."
+  example_output: "<Answer> {\"rrgjackal\": [-52.86,141.5]} </Answer>"
+- example_input: "Enyo, move to the fuel tank. Jackal, you go to the middle of the bridge."
+  example_output: "<Answer> {\"enyo\": [-55.0,81.0], \"rrgjackal\": [-81.0,-12.0]} </Answer>"
+
+instruction_preamble: "Here is a new World, new list of robot IDs, and new instruction. Tell me the robot IDs and (x,y) coordinates for the instruction. Remember you MUST format your final answer using the defined Response Format: {response_format}.\n<Robots>rrgjackal, rrghusky, enyo</Robots>\n<World>landmark[id=Fuel Tank,semantics=fuel,pos(-55.0,81.0)],landmark[id=Red Barn,semantics=building,pos(-53.0,82.0)],landmark[id=Bridge Headquarters Side ,semantics=bridge,pos(-66.0,38.0)],landmark[id=Bridge Center,semantics=bridge,pos(-81.0,12.0)],landmark[id=Cadet Barber Shop,semantics=building,pos(-102.0,-8.0)],landmark[id=Activity Shack,semantics=building,pos(-109.0,-25.2)],landmark[id=Manhole,semantics=road,pos(-103.7,-75.23)],landmark[id=Rundown Building ,semantics=building,pos(-76.0,-110.0)],landmark[id=Barracks,semantics=building,pos(-118.0,-69.0)],landmark[id=Bathroom,semantics=building,pos(-83.0,-32.0)],landmark[id=Parking_Lot,semantics=parking,pos(-84.8,-46.16)],landmark[id=Cafeteria,semantics=building,pos(-140.7,-44.66)],landmark[id=Cadet Field Training Headquarters,semantics=building,pos(-22.0,28.0)],landmark[id=Tree with Sign,semantics=tree,pos(-112.29,-46.68)]</World>"
+
+instruction: None
+
+response_format: "The output format is JSON of the form: \"{***robot ID***: ***[x,y]***}\". Put your answer between the XML tags <Answer> answer goes here </Answer>.".

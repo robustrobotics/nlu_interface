@@ -1,0 +1,70 @@
+- id: 10
+  instruction: "Husky, go to the Cadet Field Training Headquarters. Enyo, head over to the bathroom."
+  answer:
+    - id: rrghusky
+      goal: [-22.0, 28.0] 
+    - id: enyo
+      goal: [-83.0, -32.0]
+- id: 11
+  instruction: "Jackal, take a drive to the cafeteria. Husky, travel to the cadet barbershop."
+  answer:
+    - id: rrgjackal
+      goal: [-140.7, -44.66]  
+    - id: rrghusky
+      goal: [-102.0, -8.0]
+- id: 12
+  instruction: "Enyo, move to the manhole. Jackal, go to the rundown building."
+  answer:
+    - id: enyo
+      goal: [-103.7, -75.23]
+    - id: rrgjackal
+      goal: [-76.0, -110.0]
+- id: 13
+  instruction: "Husky, move to the activity shack. Jackal, head over to the bathroom."
+  answer:
+    - id: rrghusky
+      goal: [-109.0, -25.2]
+    - id: rrgjackal
+      goal: [-83.0, -32.0]
+- id: 14
+  instruction: "Enyo, take a walk to the fuel tank. Husky, go to the cafeteria."
+  answer:
+    - id: enyo
+      goal: [-55.0, 81.0]
+    - id: rrghusky
+      goal: [-140.7, -44.66]  
+- id: 15
+  instruction: "Enyo, head to the red barn. Jackal, travel to the cadet barbershop."
+  answer:
+    - id: enyo
+      goal: [-55.0, 81.0]
+    - id: rrgjackal
+      goal: [-102.0, -8.0]
+- id: 16
+  instruction: "Husky, go to the parking lot. Jackal, get to the manhole."
+  answer:
+    - id: rrghusky
+      goal: [-84.8, -46.16]
+    - id: rrgjackal
+      goal: [-103.7, -75.23]
+- id: 17
+  instruction: "Enyo, travel to the cadet barbershop. Husky, move over to the activity shack."
+  answer:
+    - id: enyo
+      goal: [-102.0, -8.0]
+    - id: rrghusky
+      goal: [-109.0, -25.2]
+- id: 18
+  instruction: "Jackal, move to the Cadet Field Training Headquarters. Enyo, move to the rundown building."
+  answer:
+    - id: rrgjackal
+      goal: [-22.0, 28.0] 
+    - id: enyo
+      goal: [-76.0, -110.0]
+- id: 19
+  instruction: "Jackal, head to the parking lot. Husky, go to the bathroom."
+  answer:
+    - id: rrgjackal
+      goal: [-84.8, -46.16]
+    - id: rrghusky
+      goal: [-83.0, -32.0]

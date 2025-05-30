@@ -1,0 +1,65 @@
+- id: 90
+  instruction: "One of you go to the Cadet Field Training Headquarters, another head over to the bathroom, and the third get to the fuel tank."
+  answer:
+    - goal: [-22.0, 28.0] 
+    - goal: [-83.0, -32.0]
+    - goal: [-55.0, 81.0]
+- id: 91
+  instruction: "Someone take a drive to the cafeteria. The other two either travel to the cadet barbershop or walk to the rundown building."
+  answer:
+    - goal: [-140.7, -44.66]  
+    - goal: [-102.0, -8.0]
+    - goal: [-76.0, -110.0]
+- id: 92
+  instruction: "Each of you do a different one of the following: move to the manhole, go to the rundown building, and head to the red barn."
+  answer:
+    - goal: [-103.7, -75.23]
+    - goal: [-76.0, -110.0]
+    - goal: [-55.0, 81.0]
+- id: 93
+  instruction: "One of you take a drive to the hair salon. Someone else go to the red building. The third should move to the sleeping quarters."
+  answer:
+    - goal: [-102.0, -8.0]
+    - goal: [-53.0, 82.0]
+    - goal: [-118.0, -69.0]
+- id: 94
+  instruction: "Someone walk to the gas tank. The other two either go to HQ or drive to the hair salon."
+  answer:
+    - goal: [-55.0, 81.0]
+    - goal: [-22.0, 28.0]
+    - goal: [-102.0, -8.0]
+- id: 95
+  instruction: "I need each of you to go to a different one of the following places: the porta potties, the sewer access point, and the paved area."
+  answer:
+    - goal: [-83.0, -32.0]
+    - goal: [-103.7, -75.23]
+    - goal: [-84.8, -46.16]
+- id: 96
+  instruction: "One of you go to the sleeping quarters. I also need someone to drive to the gas tank. And someone else should get to the red building."
+  answer:
+    - goal: [-118.0, -69.0]
+    - goal: [-55.0, 81.0]
+    - goal: [-53.0, 82.0]
+- id: 97
+  instruction: "One of you move between the manhole and the rundown building. Someone else go between the barracks and the rundown building. Someone else go to the landmark farthest from the red barn."
+  answer:
+    - goal: [-89.85, -92.615]
+    - goal: [-97.0, -89.5]
+    - goal: [-76.0, -110.0]
+      notes: the rundown building
+- id: 98
+  instruction: "Each of you do a different one of the following:  go between the barracks and the rundown building, move to the location to the right of the HQ side of the bridge, and move near, but not exactly to, the red barn."
+  answer:
+    - goal: [-97.0, -89.5]
+    - goal: [-22.0, 28.0]
+      notes: the hq
+    - goal: [-53.0, 82.0]
+      note: Not the actual red barn; a circle around it
+- id: 99
+  instruction: "Someone go to the left side of the cadet barbershop. Someone else move near, but not exactly to, the red barn. Whoever is left should move between the manhole and the rundown building."
+  answer:
+    - goal: [-102.0, -8.0]
+      note: Not the actual cadet barber shop location; semicircle to the left of it
+    - goal: [-53.0, 82.0]
+      note: Not the actual red barn; a circle around it
+    - goal: [-89.85, -92.615]

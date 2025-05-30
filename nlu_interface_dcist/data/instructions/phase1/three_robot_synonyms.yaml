@@ -1,0 +1,90 @@
+- id: 50
+  instruction: "Jackal, go to HQ. Husky, move to the abandoned building. Enyo, walk to the porta potties"
+  answer:
+    - id: rrgjackal
+      goal: [-22.0, 28.0]
+    - id: rrghusky
+      goal: [-76.0, -110.0]
+    - id: enyo
+      goal: [-83.0, -32.0]
+- id: 51
+  instruction: "Enyo, head to the sewer access point. Husky, go to the porta potties. Jackal, head to the mess hall."
+  answer:
+    - id: enyo
+      goal: [-103.7, -75.23]
+    - id: rrghusky
+      goal: [-83.0, -32.0]
+    - id: rrgjackal
+      goal: [-140.7, -44.66]
+- id: 52
+  instruction: "Husky, move to the paved area. Jackal, move to the gas tank. Enyo, go to HQ."
+  answer:
+    - id: rrghusky
+      goal: [-84.8, -46.16]
+    - id: rrgjackal
+      goal: [-55.0, 81.0]
+    - id: enyo
+      goal: [-22.0, 28.0]
+- id: 53
+  instruction: "Enyo, take a drive to the hair salon. Jackal, go to the red building. Husky, move to the sleeping quarters."
+  answer:
+    - id: enyo
+      goal: [-102.0, -8.0]
+    - id: rrgjackal
+      goal: [-53.0, 82.0]
+    - id: rrghusky
+      goal: [-118.0, -69.0]
+- id: 54
+  instruction: "Enyo, walk to the gas tank. Husky, go to HQ. Jackal, drive to the hair salon."
+  answer:
+    - id: enyo
+      goal: [-55.0, 81.0]
+    - id: rrghusky
+      goal: [-22.0, 28.0]
+    - id: rrgjackal
+      goal: [-102.0, -8.0]
+- id: 55
+  instruction: "Jackal, go to the porta potties. Husky, move to the sewer access point. Enyo, walk to the paved area."
+  answer:
+    - id: rrgjackal
+      goal: [-83.0, -32.0]
+    - id: rrghusky
+      goal: [-103.7, -75.23]
+    - id: enyo
+      goal: [-84.8, -46.16]
+- id: 56
+  instruction: "Enyo, head to the mess hall. Jackal, take a drive to the hair salon. Husky, go to the mess hall."
+  answer:
+    - id: enyo
+      goal: [-140.7, -44.66]
+    - id: rrgjackal
+      goal: [-102.0, -8.0]
+    - id: rrghusky
+      goal: [-140.7, -44.66]
+- id: 57
+  instruction: "Husky, move to the abandoned building. Jackal, move to the paved area. Enyo, head to the gas tank."
+  answer:
+    - id: rrghusky
+      goal: [-76.0, -110.0]
+    - id: rrgjackal
+      goal: [-84.8, -46.16]
+    - id: enyo
+      goal: [-55.0, 81.0]
+- id: 58
+  instruction: "Jackal, move to the red building. Enyo, walk over to the porta potties. Husky, go to hair salon."
+  answer:
+    - id: rrgjackal
+      goal: [-53.0, 82.0]
+    - id: enyo
+      goal: [-83.0, -32.0]
+    - id: rrghusky
+      goal: [-102.0, -8.0]
+- id: 59
+  instruction: "Jackal, go to the sleeping quarters. Husky, drive to the gas tank. Enyo, get to the red building."
+  answer:
+    - id: rrgjackal
+      goal: [-118.0, -69.0]
+    - id: rrghusky
+      goal: [-55.0, 81.0]
+    - id: enyo
+      goal: [-53.0, 82.0]

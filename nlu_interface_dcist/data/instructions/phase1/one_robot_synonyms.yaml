@@ -1,0 +1,50 @@
+- id: 30
+  instruction: "Husky, go to HQ."
+  answer:
+    - id: rrghusky
+      goal: [-22.0, 28.0]
+- id: 31
+  instruction: "Husky, head to the sewer access point."
+  answer:
+    - id: rrghusky
+      goal: [-103.7, -75.23]
+- id: 32
+  instruction: "Husky, move to the paved area."
+  answer:
+    - id: rrghusky
+      goal: [-84.8, -46.16]
+- id: 33
+  instruction: "Husky, take a drive to the hair salon."
+  answer:
+    - id: rrghusky
+      goal: [-102.0, -8.0]
+- id: 34
+  instruction: "Enyo, walk to the gas tank."
+  answer:
+    - id: enyo
+      goal: [-55.0, 81.0]
+- id: 35
+  instruction: "Enyo, go to the porta potties."
+  answer:
+    - id: enyo
+      goal: [-83.0, -32.0]
+- id: 36
+  instruction: "Enyo, head to the mess hall."
+  answer:
+    - id: enyo
+      goal: [-140.7, -44.66]
+- id: 37
+  instruction: "Jackal, move to the abandoned building."
+  answer:
+    - id: rrgjackal
+      goal: [-76.0, -110.0]
+- id: 38
+  instruction: "Jackal, move to the red building."
+  answer:
+    - id: rrgjackal
+      goal: [-53.0, 82.0]
+- id: 39
+  instruction: "Jackal, go to the sleeping quarters."
+  answer:
+    - id: rrgjackal
+      goal: [-118.0, -69.0]

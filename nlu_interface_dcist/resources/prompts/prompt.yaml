@@ -1,0 +1,17 @@
+system: "You are an expert question answering agent. Congrats! You will be asked a question, and you should provide an answer. You got this! You MUST format your final answer using the defined response format {response_format}"
+
+incontext_examples_preamble: "Here are some examples of questions you have answered before. Well done!"
+
+incontext_examples:
+- example_input: "What is the meaning of life?"
+  example_output: "<Answer> 42 </Answer>"
+- example_input: "What is the solid form of water?"
+  example_output: "<Answer> ice </Answer>"
+- example_input: "How many fingers am I holding up?"
+  example_output: "<Answer> two </Answer>"
+
+instruction_preamble: "Here is a new question for you to answer. Do your best! Remember you MUST format your final answer using the defined Response Format: {response_format}."
+
+instruction: "Where am I? What is this place?"
+
+response_format: "Put your answer between the XML tags <Answer> answer goes here </Answer>."
