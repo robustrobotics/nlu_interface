@@ -4,6 +4,7 @@ import argparse
 import ast
 import re
 import json
+import time
 
 from typing import List
 from dataclasses import dataclass, field
@@ -18,6 +19,7 @@ yaml = YAML(typ="safe")
 @dataclass
 class Result:
     uid: int
+    instruction: str
     ground_truth: str
     answer: str
     runtime: float
@@ -28,6 +30,7 @@ class Result:
     def to_dict(self):
         d = {
             "id" : self.uid,
+            "instruction" : self.instruction,
             "ground_truth" : self.ground_truth,
             "answer" : self.answer,
             "runtime" : self.runtime,
@@ -43,8 +46,9 @@ class Answer:
     goal: List[float] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, d, uid):
+    def from_dict(cls, d):
         goal = [ x for x in d["goal"] ]
+        uid = d["id"]
         return cls(uid=uid, goal=goal)
 
 @dataclass
@@ -57,7 +61,7 @@ class Instruction:
     def from_dict(cls, d):
         uid = d["id"]
         text = d["instruction"]
-        answer = [ Answer.from_dict(a, uid) for a in d["answer"] ]
+        answer = [ Answer.from_dict(a) for a in d["answer"] ]
         return cls(uid=uid, text=text, answer=answer)
 
 def parse_response(response_string) -> str:
@@ -67,8 +71,6 @@ def parse_response(response_string) -> str:
     else:
         raise ValueError(f"Unable to parse the answer from the response: {response_string}")
     return parsed_response
-
-import time  # Import the time module for measuring runtime
 
 def main(llm_interface, instructions):
     print("Start of the evaluation program.")
@@ -88,6 +90,7 @@ def main(llm_interface, instructions):
         results.append(
             Result(
                 uid=instruction.uid,
+                instruction=instruction.text,
                 ground_truth=str(instruction.answer),
                 answer=parsed_answer,
                 runtime=runtime,
@@ -97,8 +100,6 @@ def main(llm_interface, instructions):
             )
         )
         count += 1
-        if count == 2:
-            break
     # Export the results to JSON
     timestr = time.strftime("%Y%m%d-%H%M%S")
     results_filepath = f"/tmp/results-{llm_interface.model}-{timestr}.json"
@@ -115,9 +116,6 @@ if __name__ == "__main__":
     parser.add_argument("--prompt", required=True, type=str)
     parser.add_argument("--instruction_files", nargs="+", required=True)
     args = parser.parse_args()
-
-    # import pdb
-    # breakpoint()
 
     # Load the prompt
     with open(args.prompt, "r") as file:
