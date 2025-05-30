@@ -1,3 +1,4 @@
+interface_type: openai
 model: gpt-4o
 prompt_mode: default
 prompt_type: default

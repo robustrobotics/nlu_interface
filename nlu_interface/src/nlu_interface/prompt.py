@@ -15,7 +15,7 @@ class IncontextExample:
 
     @classmethod
     def from_dict(cls, d):
-        return IncontextExample(d["example_input"], d["example_output"])
+        return cls(d["example_input"], d["example_output"])
 
 class Prompt(ABC):
     @abstractmethod
