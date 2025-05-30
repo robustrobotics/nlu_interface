@@ -43,9 +43,13 @@ class Answer:
     goal: List[float] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, d, uid):
+    def from_dict(cls, d):
+        id = 'any'
+        if "id" in d:
+            id = d["id"]
+            
         goal = [ x for x in d["goal"] ]
-        return cls(uid=uid, goal=goal)
+        return cls(uid=id, goal=goal)
 
 @dataclass
 class Instruction:
@@ -57,7 +61,7 @@ class Instruction:
     def from_dict(cls, d):
         uid = d["id"]
         text = d["instruction"]
-        answer = [ Answer.from_dict(a, uid) for a in d["answer"] ]
+        answer = [ Answer.from_dict(a) for a in d["answer"] ]
         return cls(uid=uid, text=text, answer=answer)
 
 def parse_response(response_string) -> str:
@@ -141,6 +145,7 @@ if __name__ == "__main__":
         case "anthropic": 
             llm_interface = AnthropicBedrockWrapper(config=AnthropicBedrockConfig(**llm_config_dict), prompt=prompt)
         case "ollama":
+            print("Using Ollama interface with config:", llm_config_dict)
             llm_interface = OllamaWrapper(config=OllamaConfig(**llm_config_dict), prompt=prompt)
         case _:
             raise ValueError(f"Unrecognized interface type: {interface_type}.")
