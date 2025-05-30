@@ -14,4 +14,4 @@ instruction_preamble: "Here is a new World, new list of robot IDs, and new instr
 
 instruction: None
 
-response_format: "The output format is JSON of the form: \"{***robot ID***: ***[x,y]***}\". Put your answer between the XML tags <Answer> answer goes here </Answer>.".
+response_format: "The output format is JSON of the form: \"{***robot ID***: ***[x,y]***}\". Put your answer between the XML tags <Answer> answer goes here </Answer>."
