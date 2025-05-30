@@ -67,7 +67,7 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
         # Create the OpenAI client
         self._create_client()
 
-    def _query(self) -> APIResponse:
+    def _query(self) -> Tuple[str, APIResponse]:
         if not self.prompt:
             raise ValueError("No prompt available in _query().")
         instructions, user = self.prompt.to_openai(self.num_incontext_examples)
@@ -171,7 +171,7 @@ class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
         # Create the AnthropicBedrock client
         self._create_client()
 
-    def _query(self) -> Message:
+    def _query(self) -> Tuple[str, Message]:
         if not self.prompt:
             raise ValueError("No prompt available in _query().")
         system, user = self.prompt.to_anthropic(self.num_incontext_examples)
@@ -188,7 +188,8 @@ class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
             max_tokens=4096,
         )
         self.response_history.append(response)
-        return response
+        output_text = response.content[0].text
+        return output_text, response
 
     def _create_client(self):
         self.client = anthropic.AnthropicBedrock(
