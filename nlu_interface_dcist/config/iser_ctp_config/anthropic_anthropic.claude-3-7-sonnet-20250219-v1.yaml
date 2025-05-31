@@ -1,0 +1,10 @@
+interface_type: anthropic
+model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+prompt_mode: default
+prompt_type: default
+num_incontext_examples: -1
+temperature: 0.0
+aws_region: us-west-2
+access_key_env_var: AWS_ACCESS_KEY
+secret_key_env_var: AWS_SECRET_KEY
+debug: True

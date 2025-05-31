@@ -19,15 +19,18 @@
     - id: rrghusky
       goal: [-102.0, -8.0]
       note: Not the actual cadet barber shop location; semicircle to the left of it
+      manual: true
     - id: enyo
       goal: [-53.0, 82.0]
       note: Not the actual red barn; a circle around it
+      manual: true
 - id: 73
   instruction: "Enyo, go to the right side of the activity shack. Husky, go to the landmark farthest from the red barn."
   answer:
     - id: enyo
       goal: [-109.0, -25.2]
       note: Not the actual activity shack; semicircle to the right of it
+      manual: true
     - id: rrghusky
       goal: [-76.0, -110.0]
       notes: the rundown building
@@ -37,6 +40,7 @@
     - id: rrgjackal
       goal: [-53.0, 82.0]
       note: Not the actual red barn; a circle around it
+      manual: true
     - id: enyo
       goal: [-118.0, -69.0]
       note: the barracks
@@ -66,6 +70,7 @@
     - id: enyo
       goal: [-102.0, -8.0]
       note: Not the actual cadet barber shop location; semicircle to the left of it
+      manual: true
 - id: 78
   instruction: "Jackal, move to the location to the right of the HQ side of the bridge. Husky, move near, but not exactly to, the red barn."
   answer:
@@ -75,6 +80,7 @@
     - id: rrghusky
       goal: [-53.0, 82.0]
       note: Not the actual red barn; a circle around it
+      manual: true
 - id: 79
   instruction: "Jackal, go to the landmark farthest from the red barn. Husky, head to the location nearest to the fuel tank."
   answer:

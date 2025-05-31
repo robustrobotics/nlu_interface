@@ -40,6 +40,7 @@ class OpenAIConfig(LLMConfig):
 @dataclass
 class OllamaConfig(LLMConfig):
     ollama_url: str = "http://localhost:11434"
+    think: bool = True
 
 @dataclass
 class AnthropicBedrockConfig(LLMConfig):

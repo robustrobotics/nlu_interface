@@ -3,29 +3,34 @@
   answer:
     - id: rrghusky
       goal: [-89.85, -92.615]
+      manual: true
 - id: 61
   instruction: "Husky, go between the barracks and the rundown building."
   answer:
     - id: rrghusky
       goal: [-97.0, -89.5]
+      manual: true
 - id: 62
   instruction: "Husky, go to the left side of the cadet barbershop."
   answer:
     - id: rrghusky
       goal: [-102.0, -8.0]
       note: Not the actual cadet barber shop location; semicircle to the left of it
+      manual: true
 - id: 63
   instruction: "Husky, go to the right side of the activity shack."
   answer:
     - id: rrghusky
       goal: [-109.0, -25.2]
       note: Not the actual activity shack; semicircle to the right of it
+      manual: true
 - id: 64
   instruction: "Enyo, move near, but not exactly to, the red barn."
   answer:
     - id: enyo
       goal: [-53.0, 82.0]
       note: Not the actual red barn; a circle around it
+      manual: true
 - id: 65
   instruction: "Enyo, head to the landmark closest to the manhole."
   answer:

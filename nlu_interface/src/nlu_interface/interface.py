@@ -45,7 +45,7 @@ class LLMInterface(ABC, Generic[P, C]):
         raise NotImplementedError('Subclasses must implement "_create_client()".')
 
 class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
-    valid_model_names = ("gpt-4o", "gpt-4o-mini")
+    valid_model_names = ("gpt-4o", "gpt-4o-mini", "gpt-4o-mini-2024-07-18", "gpt-4o-2024-08-06")
     valid_prompt_modes = ("default", "chain-of-thought")
 
     def __init__(
@@ -103,6 +103,7 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
     ):
         super().__init__(config, prompt)
         self.ollama_url = config.ollama_url
+        self.think = config.think if hasattr(config, 'think') else True
         
         self._create_client()
         self.valid_model_names = self._get_model_names()
@@ -144,10 +145,12 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
 
         response = self.client.generate(
             model=self.model,
-            prompt=prompt
+            prompt=prompt,
+            think=self.think
         )
         self.response_history.append(response)
         return response['response'], response
+    
         
 class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
     valid_model_names = (
