@@ -1,3 +1,4 @@
+interface_type: ollama
 model: deepseek-r1:8b
 prompt_mode: default
 prompt_type: default

@@ -4,15 +4,18 @@ from typing import List, Tuple, Dict
 
 @dataclass
 class IncontextExample:
-    def __init__(self, example_input: str, example_output: str):
-        example_input: str
-        example_output: str
+    example_input: str
+    example_output: str
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
         return self.example_input + "\n" + self.example_output
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(d["example_input"], d["example_output"])
 
 class Prompt(ABC):
     @abstractmethod
@@ -34,14 +37,14 @@ class DefaultPrompt(Prompt):
         self,
         system: str = None,
         incontext_examples_preamble: str = None,
-        incontext_examples: List[IncontextExample] = [],
+        incontext_examples: List[Dict[str,str]] = [],
         instruction_preamble: str = None,
         instruction: str = None,
         response_format: str = None,
     ):
         self.system = system
         self.incontext_examples_preamble = incontext_examples_preamble
-        self.incontext_examples = incontext_examples
+        self.incontext_examples = [IncontextExample.from_dict(e) for e in incontext_examples]
         self.instruction_preamble = instruction_preamble
         self.instruction = instruction
         self.response_format = response_format
@@ -80,10 +83,10 @@ class DefaultPrompt(Prompt):
             else:
                 instruction_string = self.instruction_preamble
         if self.instruction:
-            instruction_string += self.instruction
+            instruction_string += " " + self.instruction
         ret = (
             f"System: {system_string}"
-            f"User: {incontext_examples_string}\n{instruction_string}"
+            f"\nUser: {incontext_examples_string}\n{instruction_string}"
         )
         return ret
 
@@ -115,7 +118,7 @@ class DefaultPrompt(Prompt):
             else:
                 instruction_string = self.instruction_preamble
         if self.instruction:
-            instruction_string += self.instruction
+            instruction_string += " " + self.instruction
         user_string = incontext_examples_string + instruction_string
         return system_string, user_string
 
@@ -147,7 +150,7 @@ class DefaultPrompt(Prompt):
             else:
                 instruction_string = self.instruction_preamble
         if self.instruction:
-            instruction_string += self.instruction
+            instruction_string += " " + self.instruction
         user_string = incontext_examples_string + instruction_string
         full_sting = system_string + "\n" + user_string
         return full_sting
@@ -179,7 +182,7 @@ class DefaultPrompt(Prompt):
             else:
                 instruction_string = self.instruction_preamble
         if self.instruction:
-            instruction_string += self.instruction
+            instruction_string += " " + self.instruction
         user_string = incontext_examples_string + instruction_string
         user_message = [{"role": "user", "content": user_string}]
         return system_string, user_message

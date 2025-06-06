@@ -1,4 +1,4 @@
-system: "You are an expert question answering agent. Congrats! You will be asked a question, and you should provide an answer. You got this! You MUST format your final answer using the defined response format {response_format}"
+system: "You are an expert question answering agent. Congrats! You will be asked a question, and you should provide an answer. You got this! You MUST format your final answer using the defined response format {response_format}."
 
 incontext_examples_preamble: "Here are some examples of questions you have answered before. Well done!"
 
@@ -14,4 +14,4 @@ instruction_preamble: "Here is a new question for you to answer. Do your best! R
 
 instruction: "Where am I? What is this place?"
 
-response_format: "Put your answer between the XML tags <Answer> answer goes here </Answer>."
+response_format: "Put your answer between the XML tags <Answer> answer goes here </Answer>"

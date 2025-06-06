@@ -1,3 +1,4 @@
+interface_type: anthropic
 model: anthropic.claude-3-5-haiku-20241022-v1:0
 prompt_mode: default
 prompt_type: default

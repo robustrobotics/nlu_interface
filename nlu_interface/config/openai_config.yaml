@@ -1,4 +1,5 @@
-model: gpt-4o
+interface_type: openai
+model: gpt-4o-2024-08-06
 prompt_mode: default
 prompt_type: default
 num_incontext_examples: -1

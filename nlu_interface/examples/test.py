@@ -3,12 +3,11 @@ import argparse
 import ast
 import re
 
-import spark_dsg
 from ruamel.yaml import YAML
 
-from nlu_interface.config import LLMConfig, OpenAIConfig
+from nlu_interface.config import LLMConfig, OpenAIConfig, AnthropicBedrockConfig, OllamaConfig
+from nlu_interface.interface import OpenAIWrapper, AnthropicBedrockWrapper, OllamaWrapper
 from nlu_interface.prompt import Prompt, DefaultPrompt
-from nlu_interface.interface import OpenAIWrapper
 
 yaml = YAML(typ="safe")
 
@@ -22,90 +21,44 @@ def parse_response(response_string) -> str:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", required=True, type=str)
+    parser.add_argument("--llm_config", required=True, type=str)
     parser.add_argument("--prompt", required=True, type=str)
     args = parser.parse_args()
 
-    # Load the config
-    with open(args.config, "r") as file:
-        config = yaml.load(file)
-
-    # Make an LLMConfig
-    print("Constructing an LLMConfig...")
-    llm_config = LLMConfig(
-        model=config["model"],
-        prompt_mode=config["prompt_mode"],
-        prompt_type=config["prompt_type"],
-        num_incontext_examples=config["num_incontext_examples"],
-        temperature=config["temperature"],
-        debug=config["debug"],
-    )
-    print("Success!")
-
-    # Make an OpenAIConfig
-    print("Constructing an OpenAIConfig...")
-    openai_config = OpenAIConfig(
-        model=config["model"],
-        prompt_mode=config["prompt_mode"],
-        prompt_type=config["prompt_type"],
-        num_incontext_examples=config["num_incontext_examples"],
-        temperature=config["temperature"],
-        api_key_env_var=config["api_key_env_var"],
-        api_timeout=config["api_timeout"],
-        seed=config["seed"],
-        debug=config["debug"],
-    )
-    api_key = openai_config.resolve_api_key()
-    print(f"Loaded the api_key: {api_key}")
-    print("Success!")
-    print("Constructing an OpenAIConfig using **kwargs (passing the config dict)")
-    openai_config = OpenAIConfig(**config)
-    api_key = openai_config.resolve_api_key()
-    print(f"Loaded the api_key: {api_key}")
-    print("Success!")
-
-    # Load a prompt
+    # Load the prompt
     with open(args.prompt, "r") as file:
         prompt_dict = yaml.load(file)
-    # Make a BaiscPrompt
-    print("Constructing a DefaultPrompt...")
-    default_prompt = DefaultPrompt(
-        system=prompt_dict["system"],
-        incontext_examples_preamble=prompt_dict["incontext_examples_preamble"],
-        incontext_examples=prompt_dict["incontext_examples"],
-        instruction_preamble=prompt_dict["instruction_preamble"],
-        instruction=prompt_dict["instruction"],
-        response_format=prompt_dict["response_format"],
-    )
-    print("Success!")
-    print("Constructing a DefaultPrompt using **kwargs...")
-    default_prompt = DefaultPrompt( **prompt_dict )
-    print("Success!")
+    prompt = DefaultPrompt(**prompt_dict)
+    print(f"Load the prompt: {prompt.render(0)}")
 
-    # Render the prompt
-    print("Rending the DefaultPrompt...")
-    rendered_prompt = default_prompt.render( 1 )
-    print(f"rendered prompt: {rendered_prompt}")
-    print("Success!")
 
-    # Construct an OpenAIWrapper
-    print("Constructing an OpenAIWrapper")
-    openai_wrapper = OpenAIWrapper(
-        config=openai_config,
-        prompt=default_prompt,
-    )
-    print("Success!")
+    # Load the config
+    with open(args.llm_config, "r") as file:
+        llm_config_dict = yaml.load(file)
+    # Construct the interface
+    interface_type = llm_config_dict["interface_type"]
+    del llm_config_dict["interface_type"]
+    print(f"Constructing an interface of type \"{interface_type}\".")
+    llm_interface = None
+    match interface_type:
+        case "openai":
+            llm_interface = OpenAIWrapper(config=OpenAIConfig(**llm_config_dict), prompt=prompt)
+        case "anthropic":
+            llm_interface = AnthropicBedrockWrapper(config=AnthropicBedrockConfig(**llm_config_dict), prompt=prompt)
+        case "ollama":
+            llm_interface = OllamaWrapper(config=OllamaConfig(**llm_config_dict), prompt=prompt)
+        case _:
+            raise ValueError(f"Unrecognized interface type: {interface_type}.")
 
     # Query via the OpenAIWrapper
-    print("Querying OpenAI...")
-    response = openai_wrapper._query()
+    print("Querying the model...")
+    response_text, response = llm_interface._query()
+    print(f"Response Text: {response_text}")
     print(f"Response: {response}")
-    print("Success!")
 
     # Parse the response
     print("Parsing the response...")
-    answer = parse_response(response.output[0].content[0].text)
-    print(f"Answer: {answer}")
-    print("Success!")
+    answer = parse_response(response_text)
+    print(f"Parsed Response: {answer}")
 
     exit(0)

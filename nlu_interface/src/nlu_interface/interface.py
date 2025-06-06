@@ -45,7 +45,7 @@ class LLMInterface(ABC, Generic[P, C]):
         raise NotImplementedError('Subclasses must implement "_create_client()".')
 
 class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
-    valid_model_names = ("gpt-4o", "gpt-4o-mini")
+    valid_model_names = ("gpt-4o-mini-2024-07-18", "gpt-4o-2024-08-06")
     valid_prompt_modes = ("default", "chain-of-thought")
 
     def __init__(
@@ -67,7 +67,7 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
         # Create the OpenAI client
         self._create_client()
 
-    def _query(self) -> APIResponse:
+    def _query(self) -> Tuple[str, APIResponse]:
         if not self.prompt:
             raise ValueError("No prompt available in _query().")
         instructions, user = self.prompt.to_openai(self.num_incontext_examples)
@@ -83,7 +83,8 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
             temperature=self.temperature,
         )
         self.response_history.append(response)
-        return response
+        output_text = response.output[0].content[0].text
+        return output_text, response
 
     def _create_client(self):
         self.client = openai.OpenAI(
@@ -145,7 +146,8 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
             prompt=prompt
         )
         self.response_history.append(response)
-        return response
+        output_text = response["response"]
+        return output_text, response
         
 class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
     valid_model_names = (
@@ -170,7 +172,7 @@ class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
         # Create the AnthropicBedrock client
         self._create_client()
 
-    def _query(self) -> Message:
+    def _query(self) -> Tuple[str, Message]:
         if not self.prompt:
             raise ValueError("No prompt available in _query().")
         system, user = self.prompt.to_anthropic(self.num_incontext_examples)
@@ -187,7 +189,8 @@ class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
             max_tokens=4096,
         )
         self.response_history.append(response)
-        return response
+        output_text = response.content[0].text
+        return output_text, response
 
     def _create_client(self):
         self.client = anthropic.AnthropicBedrock(
