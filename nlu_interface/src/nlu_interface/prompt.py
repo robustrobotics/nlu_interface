@@ -44,7 +44,10 @@ class DefaultPrompt(Prompt):
     ):
         self.system = system
         self.incontext_examples_preamble = incontext_examples_preamble
-        self.incontext_examples = [IncontextExample.from_dict(e) for e in incontext_examples]
+        if incontext_examples is not None:
+            self.incontext_examples = [IncontextExample.from_dict(e) for e in incontext_examples]
+        else:
+            self.incontext_examples = []
         self.instruction_preamble = instruction_preamble
         self.instruction = instruction
         self.response_format = response_format
