@@ -1,0 +1,9 @@
+interface_type: ollama
+model: deepseek-r1:32b
+prompt_mode: default
+prompt_type: default
+num_incontext_examples: -1
+temperature: 0.0
+ollama_url: http://wayfarer.csail.mit.edu:11434
+debug: True
+think: True
