@@ -55,6 +55,6 @@
   instruction: "Spot, inspect objects 38, 47, and 50 or then move to place 45. Hamilton, head to place 10 without visiting place 45."
   answer:
     - id: spot
-      goal: (or (Safe O(38)) (Safe O(47)) (Safe O(50)) (AtPlace P(45)))
+      goal: (or (and (Safe O(38)) (Safe O(47)) (Safe O(50))) (AtPlace P(45)))
     - id: hamilton
       goal: (and (VisitedPlace P(10)) (not (VisitedPlace P(45))))

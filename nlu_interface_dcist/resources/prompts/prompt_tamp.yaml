@@ -2,7 +2,7 @@ system: "You are a helpful assistant who is an expert at mapping from natural la
 
 domain_description: "<Robots>
 spot: spot is a quadraped robot. It is able to move and inspect objects. It has the following unique id: `spot`.
-hamilton: hamilton is a ground vehicle robot. It is able to move, but it cannot inspect objects. It has the following unique id: `hamilton`.
+hamilton: hamilton is a ground vehicle robot. It is able to move and inspect objects. It has the following unique id: `hamilton`.
 </Robots>
 <Predicates>
 (VisitedPlace ?P): takes one Place ?P and returns True if the robot has ever been the the Place ?P.

@@ -79,19 +79,29 @@ def parse_response(response_string) -> str:
 
 def main(llm_interface, instructions):
     print("Start of the evaluation program.")
-    count = 0
+    count = 1
     results = []
     for instruction in instructions:
-        print(f"Instruction {count} of {len(instructions)}")
+        print(f"Instruction {count} of {len(instructions)}: {instruction.text}")
         llm_interface.prompt.instruction = instruction.text
         print("Querying...")
+        success=True
         start_time = time.time()  # Start the timer
-        output, response = llm_interface._query()
+        try:
+            output, response = llm_interface._query()
+        except Exception as e:
+            print(f"Encountered Exception: {e}")
+            success=False
         end_time = time.time()  # End the timer
         runtime = end_time - start_time  # Calculate runtime
-        print("Parsing...")
-        parsed_answer = parse_response(output)
-        print("Logging...")
+        if success:
+            print("Parsing...")
+            parsed_answer = parse_response(output)
+            print("Logging...")
+        else:
+            parsed_answer = "invalid"
+            response = "invalid"
+            output = "invalid"
         results.append(
             Result(
                 uid=instruction.uid,
@@ -99,14 +109,12 @@ def main(llm_interface, instructions):
                 ground_truth=str(instruction.answer),
                 answer=parsed_answer,
                 runtime=runtime,
-                prompt=llm_interface.prompt.render(3),
+                prompt=llm_interface.prompt.render(llm_interface.num_incontext_examples),
                 response=str(response),
                 model=llm_interface.model,
             )
         )
         count += 1
-        if count == 2:
-            break
     # Export the results to JSON
     timestr = time.strftime("%Y%m%d-%H%M%S")
     results_filepath = f"/tmp/iser_results/results-{llm_interface.model}-{timestr}.json"
@@ -159,5 +167,10 @@ if __name__ == "__main__":
             list_of_instructions = yaml.load(f)
         for instruction in list_of_instructions:
             instructions.append( Instruction.from_dict(instruction) )
-
+    if interface_type == "ollama":
+        print(f"Caching model for ollama: {llm_interface.model}")
+        instruction = instructions[0]
+        llm_interface.prompt.instruction = instruction.text
+        llm_interface._query()
+        print("Model successfully cached.")
     main(llm_interface=llm_interface, instructions=instructions)
