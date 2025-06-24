@@ -96,13 +96,13 @@ if __name__ == "__main__":
 
     # Query via the AnthropicBedrockWrapper
     print("Querying AWS...")
-    response = anthropic_wrapper._query()
+    output_text, response = anthropic_wrapper._query()
     print(f"Response: {response}")
     print("Success!")
 
     # Parse the response
     print("Parsing the response...")
-    answer = parse_response(response.content[0].text)
+    answer = parse_response(output_text)
     print(f"Answer: {answer}")
     print("Success!")
 
