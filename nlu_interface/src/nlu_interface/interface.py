@@ -45,7 +45,7 @@ class LLMInterface(ABC, Generic[P, C]):
         raise NotImplementedError('Subclasses must implement "_create_client()".')
 
 class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
-    valid_model_names = ("gpt-4o-mini-2024-07-18", "gpt-4o-2024-08-06")
+    valid_model_names = ("gpt-4o-mini-2024-07-18", "gpt-4o-2024-08-06", "gpt-4.1-mini-2025-04-14", "gpt-4.1-nano-2025-04-14", "gpt-4.1-2025-04-14")
     valid_prompt_modes = ("default", "chain-of-thought")
 
     def __init__(
