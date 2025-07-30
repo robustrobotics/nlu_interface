@@ -15,7 +15,7 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     QHBoxLayout * p_robot_id_combo_box_layout = new QHBoxLayout;
     p_robot_id_combo_box_layout->addWidget( new QLabel("Robot ID"));
     p_robot_id_combo_box_ = new QComboBox;
-    p_robot_id_combo_box_->addItems({"spot", "hamilton", "hilbert"});
+    p_robot_id_combo_box_->addItems({"euclid", "hamilton", "hilbert"});
     p_robot_id_combo_box_layout->addWidget( p_robot_id_combo_box_ );
 
     // Create the layout for the instruction field

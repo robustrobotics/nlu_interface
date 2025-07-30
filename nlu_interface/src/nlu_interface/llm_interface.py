@@ -37,7 +37,7 @@ class ParsingFailure(Exception):
 
 
 def parse_response(response_string):
-    response_match = re.search(r"<Answer>(.*?)</Answer>", response_string)
+    response_match = re.search(r"<Answer>(.*?)</Answer>", response_string, re.DOTALL)
     if response_match:
         parsed_response = response_match.group(1)
     else:
@@ -282,7 +282,7 @@ class LLMInterface(ABC):
 
 
 class OpenAIWrapper(LLMInterface):
-    valid_model_names = ("gpt-4o", "gpt-4o-mini")
+    valid_model_names = ("gpt-4o", "gpt-4o-mini", "gpt-4.1", "gpt-4.1-mini")
     valid_prompt_modes = ("default", "chain-of-thought")
 
     def __init__(
