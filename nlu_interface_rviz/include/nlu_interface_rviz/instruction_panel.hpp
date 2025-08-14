@@ -33,10 +33,11 @@ public:
 
 protected:
 
+    void publishManipulationResponse( bool const approve );
+
+    // ROS callbacks
     void handleLLMResponse( std_msgs::msg::String const & msg );
-    
-    // TODO: Use ManipulationApprovalRequest message
-    void handleManipulationRequest( std_msgs::msg::String const & msg );
+    void handleManipulationRequest( std_msgs::msg::String const & msg ); // TODO: Use ManipulationApprovalRequest message
     // Data members
     QSet<QString> robot_ids_;
 
@@ -58,14 +59,14 @@ protected:
     QComboBox * p_robot_id_combo_box_;
     QComboBox * p_manipulation_robot_id_combo_box_;
     QLabel * p_manipulation_image_label_; //TODO: Display a sensor_msgs/Image as a QLabel
-    QRadioButton * p_approve_radio_button_;
-    QRadioButton * p_reject_radio_button_;
-    QPushButton * p_manipulation_push_button_;
+    QPushButton * p_manipulation_approve_push_button_;
+    QPushButton * p_manipulation_reject_push_button_;
     QTimer * p_timer_;
 
 private Q_SLOTS:
     void publishInstruction( void );
     void publishManipulationApproval( void );
+    void publishManipulationRejection( void );
     void publishSystemMonitor( void );
 }; // class InstructionPanel
 }  // namespace nlu_interface_rviz

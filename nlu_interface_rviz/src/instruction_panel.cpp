@@ -46,16 +46,19 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     p_manipulation_request_layout->addWidget( new QLabel("Manipulation Approval Request"));
     p_manipulation_image_label_ = new QLabel("Manipulation Image Placeholder");
     p_manipulation_request_layout->addWidget( p_manipulation_image_label_ );
+
+    // Create the layout for the approval robot id
+    QHBoxLayout * p_manipulation_robot_id_combo_box_layout = new QHBoxLayout;
+    p_manipulation_robot_id_combo_box_layout->addWidget( new QLabel("Robot ID"));
     p_manipulation_robot_id_combo_box_ = new QComboBox;
     p_manipulation_robot_id_combo_box_->addItems(QList<QString>(robot_ids_.begin(), robot_ids_.end()));
-    p_manipulation_request_layout->addWidget( p_manipulation_robot_id_combo_box_ );
-    p_approve_radio_button_ = new QRadioButton("Approve");
-    p_approve_radio_button_->setChecked(true);
-    p_reject_radio_button_ = new QRadioButton("Reject");
-    p_manipulation_request_layout->addWidget( p_approve_radio_button_ );
-    p_manipulation_request_layout->addWidget( p_reject_radio_button_ );
-    p_manipulation_push_button_ = new QPushButton("Send Manipulation Approval");
-    p_manipulation_request_layout->addWidget( p_manipulation_push_button_ );
+    p_manipulation_robot_id_combo_box_layout->addWidget( p_manipulation_robot_id_combo_box_ );
+
+    QHBoxLayout * p_manipulation_approval_layout = new QHBoxLayout;
+    p_manipulation_approve_push_button_ = new QPushButton("Approve");
+    p_manipulation_approval_layout->addWidget( p_manipulation_approve_push_button_ );
+    p_manipulation_reject_push_button_ = new QPushButton("Reject");
+    p_manipulation_approval_layout->addWidget( p_manipulation_reject_push_button_ );
 
     // Organize the layouts vertically
     QVBoxLayout * p_layout = new QVBoxLayout;
@@ -65,6 +68,8 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     p_layout->addLayout( p_prev_instruction_layout );
     p_layout->addLayout( p_llm_response_layout );
     p_layout->addLayout( p_manipulation_request_layout );
+    p_layout->addLayout( p_manipulation_robot_id_combo_box_layout );
+    p_layout->addLayout( p_manipulation_approval_layout );
     setLayout( p_layout );
 
     // Create a timer to regularly publish to the system monitor
@@ -72,7 +77,8 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
 
     // Create Qt connections
     QObject::connect( p_instruction_editor_, SIGNAL(returnPressed()), this, SLOT(publishInstruction()) );
-    QObject::connect( p_manipulation_push_button_, SIGNAL(clicked()), this, SLOT(publishManipulationApproval()) );
+    QObject::connect( p_manipulation_approve_push_button_, SIGNAL(clicked()), this, SLOT(publishManipulationApproval()) );
+    QObject::connect( p_manipulation_reject_push_button_, SIGNAL(clicked()), this, SLOT(publishManipulationRejection()) );
     QObject::connect( p_timer_, &QTimer::timeout, this, &InstructionPanel::publishSystemMonitor );
     p_timer_->start(500);
     return;
@@ -123,9 +129,19 @@ void InstructionPanel::publishInstruction( void ){
 }
 
 void InstructionPanel::publishManipulationApproval( void ){
+    publishManipulationResponse(true);
+    return;
+}
+
+void InstructionPanel::publishManipulationRejection( void ){
+    publishManipulationResponse(false);
+    return;
+}
+
+void InstructionPanel::publishManipulationResponse( bool const approve ){
     // Construct the approval message (bool)
     auto msg = std_msgs::msg::Bool();
-    msg.data = p_approve_radio_button_->isChecked() ? true : false;
+    msg.data = approve;
     // Get the publisher for the selected robot id
     auto it_publisher = manipulation_approval_publishers_.find( p_manipulation_robot_id_combo_box_->currentText().toStdString() );
     assert( it_publisher != manipulation_approval_publishers_.end() );
