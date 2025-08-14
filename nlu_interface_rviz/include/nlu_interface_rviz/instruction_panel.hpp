@@ -5,16 +5,22 @@
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <std_msgs/msg/bool.hpp>
 #include <ros_system_monitor_msgs/msg/node_info_msg.hpp>
 #include <omniplanner_msgs/msg/language_goal_msg.hpp>
 #include <omniplanner_msgs/msg/goto_points_goal_msg.hpp>
+//#include <nlu_interface_rviz/msg/manipulation_approval_request.hpp>
 
 // Qt
 #include <QLabel>
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QRadioButton>
+#include <QPushButton>
 #include <QTimer>
+#include <QSet>
+#include <QString>
 
 namespace nlu_interface_rviz {
 class InstructionPanel : public rviz_common::Panel
@@ -27,8 +33,12 @@ public:
 
 protected:
 
-    //void topicCallback(const std_msgs::msg::String & msg);
     void handleLLMResponse( std_msgs::msg::String const & msg );
+    
+    // TODO: Use ManipulationApprovalRequest message
+    void handleManipulationRequest( std_msgs::msg::String const & msg );
+    // Data members
+    QSet<QString> robot_ids_;
 
 
     // ROS2 member variables
@@ -36,6 +46,9 @@ protected:
     rclcpp::Publisher<omniplanner_msgs::msg::LanguageGoalMsg>::SharedPtr instruction_publisher_;
     rclcpp::Publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>::SharedPtr system_monitor_publisher_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr llm_response_subscription_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr manipulation_request_subscription_;
+    // map of robot ids to ros publishers
+    std::map< std::string, rclcpp::Publisher< std_msgs::msg::Bool >::SharedPtr> manipulation_approval_publishers_;
 
     // GUI member variables
     QTextEdit * p_llm_response_textbox_;
@@ -43,10 +56,16 @@ protected:
     QLineEdit * p_instruction_editor_;
     QComboBox * p_domain_type_combo_box_;
     QComboBox * p_robot_id_combo_box_;
+    QComboBox * p_manipulation_robot_id_combo_box_;
+    QLabel * p_manipulation_image_label_; //TODO: Display a sensor_msgs/Image as a QLabel
+    QRadioButton * p_approve_radio_button_;
+    QRadioButton * p_reject_radio_button_;
+    QPushButton * p_manipulation_push_button_;
     QTimer * p_timer_;
 
 private Q_SLOTS:
     void publishInstruction( void );
+    void publishManipulationApproval( void );
     void publishSystemMonitor( void );
 }; // class InstructionPanel
 }  // namespace nlu_interface_rviz

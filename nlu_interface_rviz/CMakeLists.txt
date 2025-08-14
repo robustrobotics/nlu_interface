@@ -12,10 +12,17 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 find_package(ament_cmake_ros REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(ros_system_monitor_msgs REQUIRED)
 find_package(omniplanner_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/ManipulationApprovalRequest.msg"
+  DEPENDENCIES sensor_msgs
+)
 
 set(CMAKE_AUTOMOC ON)
 qt5_wrap_cpp(MOC_FILES

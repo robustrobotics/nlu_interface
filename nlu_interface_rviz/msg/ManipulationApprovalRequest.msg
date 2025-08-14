@@ -1,0 +1,2 @@
+string robot_id
+sensor_msgs/Image image

@@ -4,6 +4,9 @@
 
 namespace nlu_interface_rviz {
 InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
+    // Initialize the robot ids
+    robot_ids_ = {"euclid", "hamilton", "hilbert"};
+
     // Create the layout for the domain type combo box
     QHBoxLayout * p_domain_type_combo_box_layout = new QHBoxLayout;
     p_domain_type_combo_box_layout->addWidget( new QLabel("Domain Type"));
@@ -15,7 +18,7 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     QHBoxLayout * p_robot_id_combo_box_layout = new QHBoxLayout;
     p_robot_id_combo_box_layout->addWidget( new QLabel("Robot ID"));
     p_robot_id_combo_box_ = new QComboBox;
-    p_robot_id_combo_box_->addItems({"euclid", "hamilton", "hilbert"});
+    p_robot_id_combo_box_->addItems(QList<QString>(robot_ids_.begin(), robot_ids_.end()));
     p_robot_id_combo_box_layout->addWidget( p_robot_id_combo_box_ );
 
     // Create the layout for the instruction field
@@ -38,6 +41,22 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     p_llm_response_textbox_->setReadOnly(true);
     p_llm_response_layout->addWidget( p_llm_response_textbox_ );
 
+    // Create the layout for a display of a manipulation request image
+    QVBoxLayout * p_manipulation_request_layout = new QVBoxLayout;
+    p_manipulation_request_layout->addWidget( new QLabel("Manipulation Approval Request"));
+    p_manipulation_image_label_ = new QLabel("Manipulation Image Placeholder");
+    p_manipulation_request_layout->addWidget( p_manipulation_image_label_ );
+    p_manipulation_robot_id_combo_box_ = new QComboBox;
+    p_manipulation_robot_id_combo_box_->addItems(QList<QString>(robot_ids_.begin(), robot_ids_.end()));
+    p_manipulation_request_layout->addWidget( p_manipulation_robot_id_combo_box_ );
+    p_approve_radio_button_ = new QRadioButton("Approve");
+    p_approve_radio_button_->setChecked(true);
+    p_reject_radio_button_ = new QRadioButton("Reject");
+    p_manipulation_request_layout->addWidget( p_approve_radio_button_ );
+    p_manipulation_request_layout->addWidget( p_reject_radio_button_ );
+    p_manipulation_push_button_ = new QPushButton("Send Manipulation Approval");
+    p_manipulation_request_layout->addWidget( p_manipulation_push_button_ );
+
     // Organize the layouts vertically
     QVBoxLayout * p_layout = new QVBoxLayout;
     p_layout->addLayout( p_domain_type_combo_box_layout );
@@ -45,6 +64,7 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
     p_layout->addLayout( p_instruction_layout );
     p_layout->addLayout( p_prev_instruction_layout );
     p_layout->addLayout( p_llm_response_layout );
+    p_layout->addLayout( p_manipulation_request_layout );
     setLayout( p_layout );
 
     // Create a timer to regularly publish to the system monitor
@@ -52,6 +72,7 @@ InstructionPanel::InstructionPanel(QWidget* parent) : Panel(parent) {
 
     // Create Qt connections
     QObject::connect( p_instruction_editor_, SIGNAL(returnPressed()), this, SLOT(publishInstruction()) );
+    QObject::connect( p_manipulation_push_button_, SIGNAL(clicked()), this, SLOT(publishManipulationApproval()) );
     QObject::connect( p_timer_, &QTimer::timeout, this, &InstructionPanel::publishSystemMonitor );
     p_timer_->start(500);
     return;
@@ -61,15 +82,30 @@ void InstructionPanel::onInitialize(){
     p_node_abstraction_ = getDisplayContext()->getRosNodeAbstraction().lock();
     rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
 
-    // Create the publishers & subscriptions
+    // Create the publishers
     instruction_publisher_ = node->create_publisher<omniplanner_msgs::msg::LanguageGoalMsg>("omniplanner_node/language_planner/language_goal", 10);
     system_monitor_publisher_ = node->create_publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>("~/node_status", 1);
+    // Create a manipulation approval publisher namespaced for each robot
+    for( auto const & q_robot_id : robot_ids_ ){
+        auto const robot_id = q_robot_id.toStdString();
+        auto const topic = robot_id + "/manipulation_approval";
+        manipulation_approval_publishers_.emplace(
+            robot_id, node->create_publisher<std_msgs::msg::Bool>(topic, 1)
+        );
+    }
+    // Create the subscriptions
     llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>("~/llm_response", 10, std::bind(&InstructionPanel::handleLLMResponse, this, std::placeholders::_1));
+    manipulation_request_subscription_ = node->create_subscription<std_msgs::msg::String>("~/manipulation_request", 10, std::bind(&InstructionPanel::handleManipulationRequest, this, std::placeholders::_1));
     return;
 }
 
 void InstructionPanel::handleLLMResponse(std_msgs::msg::String const & msg ){
     p_llm_response_textbox_->setText( msg.data.c_str() ); 
+    return;
+}
+
+void InstructionPanel::handleManipulationRequest(std_msgs::msg::String const & msg ){
+    p_manipulation_image_label_->setText( msg.data.c_str() );
     return;
 }
 
@@ -83,6 +119,18 @@ void InstructionPanel::publishInstruction( void ){
 
     // Update the display for the previous instruction
     p_prev_instruction_editor_->setText( p_instruction_editor_->text() );
+    return;
+}
+
+void InstructionPanel::publishManipulationApproval( void ){
+    // Construct the approval message (bool)
+    auto msg = std_msgs::msg::Bool();
+    msg.data = p_approve_radio_button_->isChecked() ? true : false;
+    // Get the publisher for the selected robot id
+    auto it_publisher = manipulation_approval_publishers_.find( p_manipulation_robot_id_combo_box_->currentText().toStdString() );
+    assert( it_publisher != manipulation_approval_publishers_.end() );
+    // Publish the approval message
+    it_publisher->second->publish( msg );
     return;
 }
 
