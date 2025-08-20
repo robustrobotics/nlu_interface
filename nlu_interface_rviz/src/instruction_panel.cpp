@@ -5,13 +5,8 @@
 namespace nlu_interface_rviz {
 InstructionPanel::InstructionPanel(QWidget *parent) : Panel(parent) {
   // Initialize the robot ids
-  p_node_abstraction_ = getDisplayContext()->getRosNodeAbstraction().lock();
-  rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
-  node->declare_parameter<std::vector<std::string>>("robot_ids", {"euclid"});
-  auto strs = node->get_parameter("robot_ids").as_string_array();
-  for (auto &s : strs) {
-    robot_ids_.insert(s.c_str());
-  }
+
+  robot_ids_ = {"uninitialized"};
 
   // Create the layout for the domain type combo box
   QHBoxLayout *p_domain_type_combo_box_layout = new QHBoxLayout;
@@ -102,6 +97,21 @@ InstructionPanel::InstructionPanel(QWidget *parent) : Panel(parent) {
 void InstructionPanel::onInitialize() {
   p_node_abstraction_ = getDisplayContext()->getRosNodeAbstraction().lock();
   rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
+
+  node->declare_parameter<std::vector<std::string>>("robot_ids", {"euclid"});
+  auto strs = node->get_parameter("robot_ids").as_string_array();
+  robot_ids_.clear();
+  for (auto &s : strs) {
+    robot_ids_.insert(s.c_str());
+  }
+
+  p_robot_id_combo_box_->clear();
+  p_robot_id_combo_box_->addItems(
+      QList<QString>(robot_ids_.begin(), robot_ids_.end()));
+
+  p_manipulation_robot_id_combo_box_->clear();
+  p_manipulation_robot_id_combo_box_->addItems(
+      QList<QString>(robot_ids_.begin(), robot_ids_.end()));
 
   // Create the publishers
   instruction_publisher_ =
