@@ -112,33 +112,36 @@ void InstructionPanel::onInitialize() {
   // Create a manipulation approval publisher and request subscriptions namespaced for each robot
   for (auto const &q_robot_id : robot_ids_) {
     auto const robot_id = q_robot_id.toStdString();
-    auto const request_topic = robot_id + "/spot_executor_node/annotated_image";
+    auto const request_topic = "/" + robot_id + "/spot_executor_node/annotated_image";
     manipulation_request_subscriptions_.emplace(
         robot_id, node->create_subscription<sensor_msgs::msg::Image>(
-            request_topic, 10, std::bind(&InstructionPanel::handleManipulationRequest, this, std::placeholders::_1)
+            request_topic, 10,
+            [this, robot_id](sensor_msgs::msg::Image::ConstSharedPtr msg){
+                this->handleManipulationRequest(msg, robot_id);
+            }
         )
     );
-    auto const approval_topic = robot_id + "/spot_executor_node/pick_confirmation";
+    auto const approval_topic = "/" + robot_id + "/spot_executor_node/pick_confirmation";
     manipulation_approval_publishers_.emplace(
         robot_id, node->create_publisher<std_msgs::msg::Bool>(approval_topic, 1));
   }
   // Create the subscriptions
   llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>(
       "~/llm_response", 10,
-      std::bind(&InstructionPanel::handleLLMResponse, this,
-                std::placeholders::_1));
+      [this](std_msgs::msg::String::ConstSharedPtr msg) {
+        this->handleLLMResponse(msg);
+      });
   return;
 }
 
-void InstructionPanel::handleLLMResponse(std_msgs::msg::String const &msg) {
-  p_llm_response_textbox_->setText(msg.data.c_str());
+void InstructionPanel::handleLLMResponse(std_msgs::msg::String::ConstSharedPtr msg) {
+  p_llm_response_textbox_->setText(msg->data.c_str());
   return;
 }
 
 void InstructionPanel::handleManipulationRequest(
-    sensor_msgs::msg::Image const &msg) {
-  auto frame_id = msg.header.frame_id;
-  p_manipulation_image_label_->setText(frame_id.c_str());
+    sensor_msgs::msg::Image::ConstSharedPtr msg, std::string const & robot_id) {
+  p_manipulation_image_label_->setText(robot_id.c_str());
   return;
 }
 

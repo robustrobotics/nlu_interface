@@ -36,9 +36,9 @@ protected:
   void publishManipulationResponse(bool const approve);
 
   // ROS callbacks
-  void handleLLMResponse(std_msgs::msg::String const &msg);
+  void handleLLMResponse(std_msgs::msg::String::ConstSharedPtr msg);
   void handleManipulationRequest(
-      sensor_msgs::msg::Image const &msg); 
+      sensor_msgs::msg::Image::ConstSharedPtr msg, std::string const & robot_id); 
   // Data members
   QSet<QString> robot_ids_;
 
