@@ -4,10 +4,6 @@
 
 namespace nlu_interface_rviz {
 InstructionPanel::InstructionPanel(QWidget *parent) : Panel(parent) {
-  // Initialize the robot ids
-
-  robot_ids_ = {"uninitialized"};
-
   // Create the layout for the domain type combo box
   QHBoxLayout *p_domain_type_combo_box_layout = new QHBoxLayout;
   p_domain_type_combo_box_layout->addWidget(new QLabel("Domain Type"));
@@ -19,8 +15,6 @@ InstructionPanel::InstructionPanel(QWidget *parent) : Panel(parent) {
   QHBoxLayout *p_robot_id_combo_box_layout = new QHBoxLayout;
   p_robot_id_combo_box_layout->addWidget(new QLabel("Robot ID"));
   p_robot_id_combo_box_ = new QComboBox;
-  p_robot_id_combo_box_->addItems(
-      QList<QString>(robot_ids_.begin(), robot_ids_.end()));
   p_robot_id_combo_box_layout->addWidget(p_robot_id_combo_box_);
 
   // Create the layout for the instruction field
@@ -54,8 +48,6 @@ InstructionPanel::InstructionPanel(QWidget *parent) : Panel(parent) {
   QHBoxLayout *p_manipulation_robot_id_combo_box_layout = new QHBoxLayout;
   p_manipulation_robot_id_combo_box_layout->addWidget(new QLabel("Robot ID"));
   p_manipulation_robot_id_combo_box_ = new QComboBox;
-  p_manipulation_robot_id_combo_box_->addItems(
-      QList<QString>(robot_ids_.begin(), robot_ids_.end()));
   p_manipulation_robot_id_combo_box_layout->addWidget(
       p_manipulation_robot_id_combo_box_);
 
@@ -98,18 +90,15 @@ void InstructionPanel::onInitialize() {
   p_node_abstraction_ = getDisplayContext()->getRosNodeAbstraction().lock();
   rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
 
-  node->declare_parameter<std::vector<std::string>>("robot_ids", {"euclid"});
-  auto strs = node->get_parameter("robot_ids").as_string_array();
-  robot_ids_.clear();
-  for (auto &s : strs) {
+  // Get the robot ids & populate the relevant combo boxes
+  auto param_robot_ids = node->declare_parameter<std::vector<std::string>>("robot_ids", {"euclid"});
+  for (auto &s : param_robot_ids) {
     robot_ids_.insert(s.c_str());
   }
 
-  p_robot_id_combo_box_->clear();
   p_robot_id_combo_box_->addItems(
       QList<QString>(robot_ids_.begin(), robot_ids_.end()));
 
-  p_manipulation_robot_id_combo_box_->clear();
   p_manipulation_robot_id_combo_box_->addItems(
       QList<QString>(robot_ids_.begin(), robot_ids_.end()));
 
@@ -120,23 +109,24 @@ void InstructionPanel::onInitialize() {
   system_monitor_publisher_ =
       node->create_publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>(
           "~/node_status", 1);
-  // Create a manipulation approval publisher namespaced for each robot
+  // Create a manipulation approval publisher and request subscriptions namespaced for each robot
   for (auto const &q_robot_id : robot_ids_) {
     auto const robot_id = q_robot_id.toStdString();
-    auto const topic = robot_id + "/manipulation_approval";
+    auto const request_topic = robot_id + "/spot_executor_node/annotated_image";
+    manipulation_request_subscriptions_.emplace(
+        robot_id, node->create_subscription<sensor_msgs::msg::Image>(
+            request_topic, 10, std::bind(&InstructionPanel::handleManipulationRequest, this, std::placeholders::_1)
+        )
+    );
+    auto const approval_topic = robot_id + "/spot_executor_node/pick_confirmation";
     manipulation_approval_publishers_.emplace(
-        robot_id, node->create_publisher<std_msgs::msg::Bool>(topic, 1));
+        robot_id, node->create_publisher<std_msgs::msg::Bool>(approval_topic, 1));
   }
   // Create the subscriptions
   llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>(
       "~/llm_response", 10,
       std::bind(&InstructionPanel::handleLLMResponse, this,
                 std::placeholders::_1));
-  manipulation_request_subscription_ =
-      node->create_subscription<std_msgs::msg::String>(
-          "~/manipulation_request", 10,
-          std::bind(&InstructionPanel::handleManipulationRequest, this,
-                    std::placeholders::_1));
   return;
 }
 
@@ -146,8 +136,9 @@ void InstructionPanel::handleLLMResponse(std_msgs::msg::String const &msg) {
 }
 
 void InstructionPanel::handleManipulationRequest(
-    std_msgs::msg::String const &msg) {
-  p_manipulation_image_label_->setText(msg.data.c_str());
+    sensor_msgs::msg::Image const &msg) {
+  auto frame_id = msg.header.frame_id;
+  p_manipulation_image_label_->setText(frame_id.c_str());
   return;
 }
 

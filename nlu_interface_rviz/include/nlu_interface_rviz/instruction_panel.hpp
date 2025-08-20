@@ -10,6 +10,7 @@
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/string.hpp>
+#include <sensor_msgs/msg/image.hpp>
 //#include <nlu_interface_rviz/msg/manipulation_approval_request.hpp>
 
 // Qt
@@ -37,8 +38,7 @@ protected:
   // ROS callbacks
   void handleLLMResponse(std_msgs::msg::String const &msg);
   void handleManipulationRequest(
-      std_msgs::msg::String const
-          &msg); // TODO: Use ManipulationApprovalRequest message
+      sensor_msgs::msg::Image const &msg); 
   // Data members
   QSet<QString> robot_ids_;
 
@@ -51,9 +51,9 @@ protected:
       system_monitor_publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr
       llm_response_subscription_;
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr
-      manipulation_request_subscription_;
-  // map of robot ids to ros publishers
+  // map of robot ids to manipulation request subscriptions and approval publishers
+  std::map<std::string, rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr>
+      manipulation_request_subscriptions_;
   std::map<std::string, rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr>
       manipulation_approval_publishers_;
 
