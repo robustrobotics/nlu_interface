@@ -3,7 +3,6 @@ import logging
 import os
 import re
 from abc import ABC, abstractmethod
-from types import MappingProxyType
 
 # Scene Graphs
 import spark_dsg
