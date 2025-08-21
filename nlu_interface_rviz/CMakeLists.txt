@@ -18,6 +18,8 @@ find_package(rviz_common REQUIRED)
 find_package(ros_system_monitor_msgs REQUIRED)
 find_package(omniplanner_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ManipulationApprovalRequest.msg"
@@ -37,6 +39,7 @@ target_include_directories(instruction_panel PUBLIC
 ament_target_dependencies(instruction_panel
   pluginlib
   rviz_common
+  cv_bridge
   ros_system_monitor_msgs
   omniplanner_msgs
 )

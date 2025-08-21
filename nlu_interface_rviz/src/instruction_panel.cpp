@@ -1,6 +1,8 @@
 #include <QVBoxLayout>
+#include <QImage>
 #include <nlu_interface_rviz/instruction_panel.hpp>
 #include <rviz_common/display_context.hpp>
+#include <cv_bridge/cv_bridge.hpp>
 
 namespace nlu_interface_rviz {
 InstructionPanel::InstructionPanel(QWidget *parent) : Panel(parent) {
@@ -141,7 +143,30 @@ void InstructionPanel::handleLLMResponse(std_msgs::msg::String::ConstSharedPtr m
 
 void InstructionPanel::handleManipulationRequest(
     sensor_msgs::msg::Image::ConstSharedPtr msg, std::string const & robot_id) {
-  p_manipulation_image_label_->setText(robot_id.c_str());
+
+    // Set the combo box to the robot id
+    p_manipulation_robot_id_combo_box_->setCurrentText(robot_id.c_str());
+
+    // Convert msg to cv::Mat
+    cv_bridge::CvImagePtr cv_ptr;
+    try{
+        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    } catch (cv_bridge::Exception &e ){
+        throw std::runtime_error("cv_bridge exception: " + std::string(e.what()));
+    }
+    auto cv_mat = cv_ptr->image;
+
+    // Convert cv::Mat to QImage
+    auto qimage = QImage(cv_mat.data, cv_mat.cols, cv_mat.rows, cv_mat.step, QImage::Format_RGB888);
+
+    // Convert QImage to QPixmap
+    auto qpixmap = QPixmap::fromImage(qimage);
+
+    // Set the QLabel's pixmap
+    p_manipulation_image_label_->setPixmap(qpixmap);
+
+
+  //p_manipulation_image_label_->setText(robot_id.c_str());
   return;
 }
 
