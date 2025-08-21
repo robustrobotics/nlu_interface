@@ -1,4 +1,6 @@
+#include <QImage>
 #include <QVBoxLayout>
+#include <cv_bridge/cv_bridge.hpp>
 #include <nlu_interface_rviz/instruction_panel.hpp>
 #include <rviz_common/display_context.hpp>
 
@@ -91,7 +93,8 @@ void InstructionPanel::onInitialize() {
   rclcpp::Node::SharedPtr node = p_node_abstraction_->get_raw_node();
 
   // Get the robot ids & populate the relevant combo boxes
-  auto param_robot_ids = node->declare_parameter<std::vector<std::string>>("robot_ids", {"euclid"});
+  auto param_robot_ids = node->declare_parameter<std::vector<std::string>>(
+      "robot_ids", {"euclid"});
   for (auto &s : param_robot_ids) {
     robot_ids_.insert(s.c_str());
   }
@@ -109,39 +112,67 @@ void InstructionPanel::onInitialize() {
   system_monitor_publisher_ =
       node->create_publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>(
           "~/node_status", 1);
-  // Create a manipulation approval publisher and request subscriptions namespaced for each robot
+  // Create a manipulation approval publisher and request subscriptions
+  // namespaced for each robot
   for (auto const &q_robot_id : robot_ids_) {
     auto const robot_id = q_robot_id.toStdString();
-    auto const request_topic = "/" + robot_id + "/spot_executor_node/annotated_image";
+    auto const request_topic =
+        "/" + robot_id + "/spot_executor_node/annotated_image";
     manipulation_request_subscriptions_.emplace(
-        robot_id, node->create_subscription<sensor_msgs::msg::Image>(
+        robot_id,
+        node->create_subscription<sensor_msgs::msg::Image>(
             request_topic, 10,
-            [this, robot_id](sensor_msgs::msg::Image::ConstSharedPtr msg){
-                this->handleManipulationRequest(msg, robot_id);
-            }
-        )
-    );
-    auto const approval_topic = "/" + robot_id + "/spot_executor_node/pick_confirmation";
+            [this, robot_id](sensor_msgs::msg::Image::ConstSharedPtr msg) {
+              this->handleManipulationRequest(msg, robot_id);
+            }));
+    auto const approval_topic =
+        "/" + robot_id + "/spot_executor_node/pick_confirmation";
     manipulation_approval_publishers_.emplace(
-        robot_id, node->create_publisher<std_msgs::msg::Bool>(approval_topic, 1));
+        robot_id,
+        node->create_publisher<std_msgs::msg::Bool>(approval_topic, 1));
   }
   // Create the subscriptions
   llm_response_subscription_ = node->create_subscription<std_msgs::msg::String>(
-      "~/llm_response", 10,
-      [this](std_msgs::msg::String::ConstSharedPtr msg) {
+      "~/llm_response", 10, [this](std_msgs::msg::String::ConstSharedPtr msg) {
         this->handleLLMResponse(msg);
       });
   return;
 }
 
-void InstructionPanel::handleLLMResponse(std_msgs::msg::String::ConstSharedPtr msg) {
+void InstructionPanel::handleLLMResponse(
+    std_msgs::msg::String::ConstSharedPtr msg) {
   p_llm_response_textbox_->setText(msg->data.c_str());
   return;
 }
 
 void InstructionPanel::handleManipulationRequest(
-    sensor_msgs::msg::Image::ConstSharedPtr msg, std::string const & robot_id) {
-  p_manipulation_image_label_->setText(robot_id.c_str());
+    sensor_msgs::msg::Image::ConstSharedPtr msg, std::string const &robot_id) {
+
+  // Set the combo box to the robot id
+  p_manipulation_robot_id_combo_box_->setCurrentText(robot_id.c_str());
+
+  // Convert msg to cv::Mat
+  cv_bridge::CvImagePtr cv_ptr;
+  try {
+    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+  } catch (cv_bridge::Exception &e) {
+    throw std::runtime_error("cv_bridge exception: " + std::string(e.what()));
+  }
+  auto cv_mat = cv_ptr->image;
+
+  // Convert cv::Mat to QImage
+  auto qimage = QImage(cv_mat.data, cv_mat.cols, cv_mat.rows, cv_mat.step,
+                       QImage::Format_BGR888);
+
+  // Convert QImage to QPixmap
+  auto qpixmap = QPixmap::fromImage(qimage);
+
+  qpixmap = qpixmap.scaled(320, 240, Qt::KeepAspectRatio);
+
+  // Set the QLabel's pixmap
+  p_manipulation_image_label_->setPixmap(qpixmap);
+
+  // p_manipulation_image_label_->setText(robot_id.c_str());
   return;
 }
 
