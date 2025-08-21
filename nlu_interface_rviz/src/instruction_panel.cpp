@@ -162,10 +162,12 @@ void InstructionPanel::handleManipulationRequest(
 
   // Convert cv::Mat to QImage
   auto qimage = QImage(cv_mat.data, cv_mat.cols, cv_mat.rows, cv_mat.step,
-                       QImage::Format_RGB888);
+                       QImage::Format_BGR888);
 
   // Convert QImage to QPixmap
   auto qpixmap = QPixmap::fromImage(qimage);
+
+  qpixmap = qpixmap.scaled(320, 240, Qt::KeepAspectRatio);
 
   // Set the QLabel's pixmap
   p_manipulation_image_label_->setPixmap(qpixmap);
