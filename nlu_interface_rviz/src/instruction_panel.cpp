@@ -166,13 +166,10 @@ void InstructionPanel::handleManipulationRequest(
 
   // Convert QImage to QPixmap
   auto qpixmap = QPixmap::fromImage(qimage);
-
   qpixmap = qpixmap.scaled(320, 240, Qt::KeepAspectRatio);
 
   // Set the QLabel's pixmap
   p_manipulation_image_label_->setPixmap(qpixmap);
-
-  // p_manipulation_image_label_->setText(robot_id.c_str());
   return;
 }
 
