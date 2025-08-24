@@ -1,5 +1,9 @@
-<library path="instruction_panel">
+<!--library path="instruction_panel"-->
+<library path="nlu_rviz_panels">
   <class type="nlu_interface_rviz::InstructionPanel" base_class_type="rviz_common::Panel">
-    <description></description>
+    <description>An interface for giving langauge commands to a robot team.</description>
+  </class>
+  <class type="nlu_interface_rviz::ManipulationApprovalPanel" base_class_type="rviz_common::Panel">
+    <description>An interface for approving, rejecting, or modifying a manipulation request.</description>
   </class>
 </library>
