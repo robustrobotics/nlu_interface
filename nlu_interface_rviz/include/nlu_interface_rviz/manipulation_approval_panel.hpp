@@ -10,20 +10,48 @@
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <std_msgs/msg/bool.hpp>
-#include <std_msgs/msg/string.hpp>
 
 // Qt
 #include <QComboBox>
 #include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
-#include <QRadioButton>
+#include <QResizeEvent>
 #include <QSet>
 #include <QString>
-#include <QTextEdit>
 #include <QTimer>
 
 namespace nlu_interface_rviz {
+class ScaledClickableLabel : public QLabel {
+  Q_OBJECT
+
+public:
+  using QLabel::QLabel;
+
+  void setOriginalPixmap(QPixmap const &pmap) {
+    original_pixmap_ = pmap;
+    updateScaledPixmap();
+    return;
+  }
+
+protected:
+  void resizeEvent(QResizeEvent *event) override {
+    QLabel::resizeEvent(event);
+    updateScaledPixmap();
+    return;
+  }
+
+private:
+  void updateScaledPixmap() {
+    if (!original_pixmap_.isNull()) {
+      QPixmap scaled_pixmap = original_pixmap_.scaled(
+          size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+      QLabel::setPixmap(scaled_pixmap);
+    }
+  }
+
+  QPixmap original_pixmap_;
+};
+
 class ManipulationApprovalPanel : public rviz_common::Panel {
   Q_OBJECT
 public:
@@ -55,8 +83,11 @@ protected:
 
   // GUI member variables
   QComboBox *p_manipulation_robot_id_combo_box_;
-  QLabel *p_manipulation_image_label_; // TODO: Display a sensor_msgs/Image as a
-                                       // QLabel
+  // QLabel *p_manipulation_image_label_; // TODO: Display a sensor_msgs/Image
+  // as a
+  ScaledClickableLabel
+      *p_manipulation_image_label_; // TODO: Display a sensor_msgs/Image as a
+                                    // QLabel
   QPushButton *p_manipulation_approve_push_button_;
   QPushButton *p_manipulation_reject_push_button_;
   QTimer *p_timer_;

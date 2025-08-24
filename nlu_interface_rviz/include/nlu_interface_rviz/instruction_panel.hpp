@@ -8,16 +8,12 @@
 #include <ros_system_monitor_msgs/msg/node_info_msg.hpp>
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
-#include <sensor_msgs/msg/image.hpp>
-#include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/string.hpp>
 
 // Qt
 #include <QComboBox>
 #include <QLabel>
 #include <QLineEdit>
-#include <QPushButton>
-#include <QRadioButton>
 #include <QSet>
 #include <QString>
 #include <QTextEdit>

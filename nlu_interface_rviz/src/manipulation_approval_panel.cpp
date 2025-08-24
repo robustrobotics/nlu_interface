@@ -5,14 +5,42 @@
 #include <rviz_common/display_context.hpp>
 
 namespace nlu_interface_rviz {
+
+QPixmap image_msg_to_pixmap(sensor_msgs::msg::Image::ConstSharedPtr msg) {
+  // Convert msg to cv::Mat
+  cv_bridge::CvImagePtr cv_ptr;
+  try {
+    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+  } catch (cv_bridge::Exception &e) {
+    throw std::runtime_error("cv_bridge exception: " + std::string(e.what()));
+  }
+  auto cv_mat = cv_ptr->image;
+
+  // Convert cv::Mat to QImage
+  auto qimage = QImage(cv_mat.data, cv_mat.cols, cv_mat.rows, cv_mat.step,
+                       QImage::Format_BGR888);
+
+  // Convert QImage to QPixmap
+  auto qpixmap = QPixmap::fromImage(qimage);
+  return qpixmap;
+}
+
 ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
     : Panel(parent) {
   // Create the layout for a display of a manipulation request image
   QVBoxLayout *p_manipulation_request_layout = new QVBoxLayout;
-  p_manipulation_request_layout->addWidget(
-      new QLabel("Manipulation Approval Request"));
-  p_manipulation_image_label_ = new QLabel("Manipulation Image Placeholder");
-  p_manipulation_request_layout->addWidget(p_manipulation_image_label_);
+  p_manipulation_request_layout->setContentsMargins(0, 0, 0, 0);
+  p_manipulation_request_layout->setSpacing(0);
+  p_manipulation_request_layout->setSizeConstraint(
+      QLayout::SetDefaultConstraint);
+
+  // p_manipulation_image_label_ = new QLabel("Manipulation Image Placeholder");
+  p_manipulation_image_label_ =
+      new ScaledClickableLabel("Manipulation Image Placeholder");
+  p_manipulation_image_label_->setMinimumSize(0, 0);
+  // p_manipulation_image_label_->setSizePolicy(QSizePolicy::Ignored,
+  // QSizePolicy::Ignored);
+  p_manipulation_request_layout->addWidget(p_manipulation_image_label_, 1);
 
   // Create the layout for the approval robot id
   QHBoxLayout *p_manipulation_robot_id_combo_box_layout = new QHBoxLayout;
@@ -34,6 +62,7 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   p_layout->addLayout(p_manipulation_robot_id_combo_box_layout);
   p_layout->addLayout(p_manipulation_approval_layout);
   setLayout(p_layout);
+  setMinimumSize(0, 0);
 
   // Create a timer to regularly publish to the system monitor
   QTimer *p_timer_ = new QTimer(this);
@@ -98,25 +127,12 @@ void ManipulationApprovalPanel::handleManipulationRequest(
   // Set the combo box to the robot id
   p_manipulation_robot_id_combo_box_->setCurrentText(robot_id.c_str());
 
-  // Convert msg to cv::Mat
-  cv_bridge::CvImagePtr cv_ptr;
-  try {
-    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-  } catch (cv_bridge::Exception &e) {
-    throw std::runtime_error("cv_bridge exception: " + std::string(e.what()));
-  }
-  auto cv_mat = cv_ptr->image;
-
-  // Convert cv::Mat to QImage
-  auto qimage = QImage(cv_mat.data, cv_mat.cols, cv_mat.rows, cv_mat.step,
-                       QImage::Format_BGR888);
-
-  // Convert QImage to QPixmap
-  auto qpixmap = QPixmap::fromImage(qimage);
-  qpixmap = qpixmap.scaled(320, 240, Qt::KeepAspectRatio);
+  // Convert the image to a pixmap
+  auto qpixmap = image_msg_to_pixmap(msg);
+  qpixmap = qpixmap.scaled(msg->height, msg->width, Qt::KeepAspectRatio);
 
   // Set the QLabel's pixmap
-  p_manipulation_image_label_->setPixmap(qpixmap);
+  p_manipulation_image_label_->setOriginalPixmap(qpixmap);
   return;
 }
 
