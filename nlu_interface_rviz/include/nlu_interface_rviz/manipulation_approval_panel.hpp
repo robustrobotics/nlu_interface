@@ -35,7 +35,6 @@ protected:
   void publishManipulationResponse(bool const approve);
 
   // ROS callbacks
-  void handleLLMResponse(std_msgs::msg::String::ConstSharedPtr msg);
   void handleManipulationRequest(sensor_msgs::msg::Image::ConstSharedPtr msg,
                                  std::string const &robot_id);
   // Data members
@@ -44,12 +43,8 @@ protected:
   // ROS2 member variables
   std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface>
       p_node_abstraction_;
-  rclcpp::Publisher<omniplanner_msgs::msg::LanguageGoalMsg>::SharedPtr
-      instruction_publisher_;
   rclcpp::Publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>::SharedPtr
       system_monitor_publisher_;
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr
-      llm_response_subscription_;
   // map of robot ids to manipulation request subscriptions and approval
   // publishers
   std::map<std::string,
@@ -59,11 +54,6 @@ protected:
       manipulation_approval_publishers_;
 
   // GUI member variables
-  QTextEdit *p_llm_response_textbox_;
-  QLineEdit *p_prev_instruction_editor_;
-  QLineEdit *p_instruction_editor_;
-  QComboBox *p_domain_type_combo_box_;
-  QComboBox *p_robot_id_combo_box_;
   QComboBox *p_manipulation_robot_id_combo_box_;
   QLabel *p_manipulation_image_label_; // TODO: Display a sensor_msgs/Image as a
                                        // QLabel
@@ -72,7 +62,6 @@ protected:
   QTimer *p_timer_;
 
 private Q_SLOTS:
-  void publishInstruction(void);
   void publishManipulationApproval(void);
   void publishManipulationRejection(void);
   void publishSystemMonitor(void);

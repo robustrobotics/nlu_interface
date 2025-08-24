@@ -11,7 +11,6 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/string.hpp>
-//#include <nlu_interface_rviz/msg/manipulation_approval_request.hpp>
 
 // Qt
 #include <QComboBox>
@@ -33,12 +32,9 @@ public:
   void onInitialize() override;
 
 protected:
-  void publishManipulationResponse(bool const approve);
-
   // ROS callbacks
   void handleLLMResponse(std_msgs::msg::String::ConstSharedPtr msg);
-  void handleManipulationRequest(sensor_msgs::msg::Image::ConstSharedPtr msg,
-                                 std::string const &robot_id);
+
   // Data members
   QSet<QString> robot_ids_;
 
@@ -51,13 +47,6 @@ protected:
       system_monitor_publisher_;
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr
       llm_response_subscription_;
-  // map of robot ids to manipulation request subscriptions and approval
-  // publishers
-  std::map<std::string,
-           rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr>
-      manipulation_request_subscriptions_;
-  std::map<std::string, rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr>
-      manipulation_approval_publishers_;
 
   // GUI member variables
   QTextEdit *p_llm_response_textbox_;
@@ -65,17 +54,10 @@ protected:
   QLineEdit *p_instruction_editor_;
   QComboBox *p_domain_type_combo_box_;
   QComboBox *p_robot_id_combo_box_;
-  QComboBox *p_manipulation_robot_id_combo_box_;
-  QLabel *p_manipulation_image_label_; // TODO: Display a sensor_msgs/Image as a
-                                       // QLabel
-  QPushButton *p_manipulation_approve_push_button_;
-  QPushButton *p_manipulation_reject_push_button_;
   QTimer *p_timer_;
 
 private Q_SLOTS:
   void publishInstruction(void);
-  void publishManipulationApproval(void);
-  void publishManipulationRejection(void);
   void publishSystemMonitor(void);
 }; // class InstructionPanel
 } // namespace nlu_interface_rviz
