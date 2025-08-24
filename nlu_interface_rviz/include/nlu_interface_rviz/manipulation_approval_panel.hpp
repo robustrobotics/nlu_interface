@@ -40,6 +40,30 @@ protected:
     return;
   }
 
+  void mousePressEvent(QMouseEvent *event) override {
+    std::cout << "In mousePressEvent()" << std::endl;
+    if (event->button() == Qt::LeftButton) {
+      auto label_x = event->pos().x();
+      auto label_y = event->pos().y();
+
+      double scale_x = static_cast<double>(this->size().width()) /
+                       original_pixmap_.size().width();
+      double scale_y = static_cast<double>(this->size().height()) /
+                       original_pixmap_.size().height();
+
+      int image_x = label_x / scale_x;
+      int image_y = label_y / scale_y;
+
+      std::cout << "Left Clicked Location: " << label_x << "," << label_y
+                << std::endl;
+      std::cout << "Scaling Factors:" << scale_x << "," << scale_y << std::endl;
+      std::cout << "Left Clicked Pixel: " << image_x << "," << image_y
+                << std::endl;
+    }
+    QLabel::mousePressEvent(event);
+    return;
+  }
+
 private:
   void updateScaledPixmap() {
     if (!original_pixmap_.isNull()) {
