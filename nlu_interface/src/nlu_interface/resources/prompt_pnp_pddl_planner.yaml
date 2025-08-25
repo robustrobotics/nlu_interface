@@ -4,6 +4,7 @@ system: "Your task is to map from natural language instructions to Planning Doma
 Euclid: Euclid is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'euclid'.
 Hamilton: Hamilton is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'hamilton'.
 Hilbert: Hilbert is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'hilbert'.
+Apollo: Apollo is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'apollo'.
 </Robots>
 
 <Scene Graph Description>
