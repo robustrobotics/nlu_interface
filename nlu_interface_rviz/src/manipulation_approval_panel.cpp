@@ -10,7 +10,7 @@ QPixmap image_msg_to_pixmap(sensor_msgs::msg::Image::ConstSharedPtr msg) {
   // Convert msg to cv::Mat
   cv_bridge::CvImagePtr cv_ptr;
   try {
-    cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    cv_ptr = cv_bridge::toCvCopy(msg, msg->encoding);
   } catch (cv_bridge::Exception &e) {
     throw std::runtime_error("cv_bridge exception: " + std::string(e.what()));
   }
