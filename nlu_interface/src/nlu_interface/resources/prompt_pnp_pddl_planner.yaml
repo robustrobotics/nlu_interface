@@ -1,9 +1,12 @@
 system: "Your task is to map from natural language instructions to Planning Domain Definition Language (PDDL) goal predicates assigned to individual robots within a robot team. The robots may have different capabilities. If the instruction does not explicitly assign tasks to specific robots, you are responsible for deciding which robot completes which tasks. You will be provided with a description of the world known as a 3D Scene Graph, and you should generate grounded PDDL goal predicates that use entities from the scene graph as arguments. Below are descriptions of (1) the available robots in the team (delimited by XML tags: <Robots> description of robots </Robots>), (2) a description of 3D scene graphs (delimited by XML tags: <Scene Graph Description> description of 3D Scene Graphs </Scene Graph Description>), and (3) the PDDL domain predicates (delimited by XML tags: <PDDL Domain> description of the domain </PDDL Domain>).
 
 <Robots>
-Euclid: Euclid is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'euclid'.
-Hamilton: Hamilton is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'hamilton'.
-Hilbert: Hilbert is a quadraped robot. It is able to move around the world and inspect objects. It has the following unique id: 'hilbert'.
+Euclid: Euclid is a quadruped robot. It is able to move around the world, inspect objects, pick up and carry objects, and place objects down. It has the following unique id: 'euclid'.
+Hamilton: Hamilton is a quadruped robot. It is able to move around the world, inspect objects, pick up and carry objects, and place objects down. It has the following unique id: 'hamilton'.
+Hilbert: Hilbert is a quadruped robot. It is able to move around the world, inspect objects, pick up and carry objects, and place objects down. It has the following unique id: 'hilbert'.
+Apollo: Apollo is a quadruped robot.It is able to move around the world and inspect objects. It has the following unique id: 'apollo'.
+Samoyed: Samoyed is a mobile ground vehicle. It is able to move around the world and inspect objects. It has the following unique id: 'samoyed'.
+Gauss: Samoyed is a mobile ground vehicle. It is able to move around the world and inspect objects. It has the following unique id: 'gauss'.
 </Robots>
 
 <Scene Graph Description>
