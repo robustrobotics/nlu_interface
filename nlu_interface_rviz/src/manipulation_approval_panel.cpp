@@ -147,7 +147,7 @@ void ManipulationApprovalPanel::onInitialize() {
     manipulation_request_subscriptions_.emplace(
         robot_id, node->create_subscription<
                       nlu_interface_rviz::msg::ManipulationApprovalRequest>(
-                      request_topic, 10,
+                      request_topic, rclcpp::QoS(10).transient_local(),
                       [this, robot_id](
                           nlu_interface_rviz::msg::ManipulationApprovalRequest::
                               ConstSharedPtr msg) {
