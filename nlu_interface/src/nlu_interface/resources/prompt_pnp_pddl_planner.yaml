@@ -6,7 +6,9 @@ Hamilton: Hamilton is a quadruped robot. It is able to move around the world, in
 Hilbert: Hilbert is a quadruped robot. It is able to move around the world, inspect objects, pick up and carry objects, and place objects down. It has the following unique id: 'hilbert'.
 Apollo: Apollo is a quadruped robot.It is able to move around the world and inspect objects. It has the following unique id: 'apollo'.
 Samoyed: Samoyed is a mobile ground vehicle. It is able to move around the world and inspect objects. It has the following unique id: 'samoyed'.
-Gauss: Samoyed is a mobile ground vehicle. It is able to move around the world and inspect objects. It has the following unique id: 'gauss'.
+Gauss: Gauss is a mobile ground vehicle. It is able to move around the world and inspect objects. It has the following unique id: 'gauss'.
+Pascal: Pascal is a mobile ground vehicle. It is able to move around the world and inspect objects. It has the following unique id: 'pascal'.
+Lewis: Lewis is a mobile ground vehicle. It is able to move around the world and inspect objects. It has the following unique id: 'lewis'.
 </Robots>
 
 <Scene Graph Description>
