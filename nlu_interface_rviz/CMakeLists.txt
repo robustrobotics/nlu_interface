@@ -23,6 +23,7 @@ find_package(OpenCV REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ManipulationApprovalRequest.msg"
+  "msg/ManipulationApprovalResponse.msg"
   DEPENDENCIES sensor_msgs
 )
 
@@ -32,17 +33,24 @@ qt5_wrap_cpp(MOC_FILES
   include/nlu_interface_rviz/manipulation_approval_panel.hpp
 )
 
-#add_library(instruction_panel 
 add_library(nlu_rviz_panels 
     src/instruction_panel.cpp 
     src/manipulation_approval_panel.cpp 
     ${MOC_FILES})
-#target_include_directories(instruction_panel PUBLIC
+
+rosidl_get_typesupport_target(
+  cpp_typesupport_target
+  ${PROJECT_NAME}
+  "rosidl_typesupport_cpp"
+)
+target_link_libraries(nlu_rviz_panels
+  ${cpp_typesupport_target}
+)
+
 target_include_directories(nlu_rviz_panels PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-#ament_target_dependencies(instruction_panel
 ament_target_dependencies(nlu_rviz_panels
   pluginlib
   rviz_common
@@ -50,7 +58,6 @@ ament_target_dependencies(nlu_rviz_panels
   ros_system_monitor_msgs
   omniplanner_msgs
 )
-#install(TARGETS instruction_panel
 install(TARGETS nlu_rviz_panels
         EXPORT export_nlu_interface_rviz
         ARCHIVE DESTINATION lib

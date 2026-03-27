@@ -34,13 +34,30 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   p_manipulation_request_layout->setSizeConstraint(
       QLayout::SetDefaultConstraint);
 
-  // p_manipulation_image_label_ = new QLabel("Manipulation Image Placeholder");
   p_manipulation_image_label_ =
       new ScaledClickableLabel("Manipulation Image Placeholder");
   p_manipulation_image_label_->setMinimumSize(0, 0);
-  // p_manipulation_image_label_->setSizePolicy(QSizePolicy::Ignored,
-  // QSizePolicy::Ignored);
   p_manipulation_request_layout->addWidget(p_manipulation_image_label_, 1);
+
+  // Create the layout for the image cycling buttons
+  QHBoxLayout *p_image_cycle_layout = new QHBoxLayout;
+  p_prev_image_button_ = new QPushButton("<");
+  p_image_index_label_ = new QLabel("Image - / -");
+  p_image_index_label_->setAlignment(Qt::AlignCenter);
+  p_next_image_button_ = new QPushButton(">");
+  p_image_cycle_layout->addWidget(p_prev_image_button_);
+  p_image_cycle_layout->addWidget(p_image_index_label_, 1);
+  p_image_cycle_layout->addWidget(p_next_image_button_);
+  p_manipulation_request_layout->addLayout(p_image_cycle_layout);
+
+  // Create the layout for the override toggle button
+  QHBoxLayout *p_manipulation_override_toggle_layout = new QHBoxLayout;
+  p_manipulation_set_detection_toggle_button_ =
+      new QPushButton("Select New Detection Pixel");
+  p_manipulation_set_detection_toggle_button_->setCheckable(
+      true); // make it toggle
+  p_manipulation_override_toggle_layout->addWidget(
+      p_manipulation_set_detection_toggle_button_);
 
   // Create the layout for the approval robot id
   QHBoxLayout *p_manipulation_robot_id_combo_box_layout = new QHBoxLayout;
@@ -49,17 +66,28 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   p_manipulation_robot_id_combo_box_layout->addWidget(
       p_manipulation_robot_id_combo_box_);
 
+  // Create the layout for displaying the selected pixels
+  QHBoxLayout *p_manipulation_selected_pixels_view_layout = new QHBoxLayout;
+  p_selected_pixels_label_ = new QLabel("Selected Pixels: N/A");
+  p_manipulation_selected_pixels_view_layout->addWidget(
+      p_selected_pixels_label_);
+
+  // Create the layout for the publish/reject/reset buttons
   QHBoxLayout *p_manipulation_approval_layout = new QHBoxLayout;
-  p_manipulation_approve_push_button_ = new QPushButton("Approve");
+  p_manipulation_publish_push_button_ = new QPushButton("Publish");
   p_manipulation_approval_layout->addWidget(
-      p_manipulation_approve_push_button_);
+      p_manipulation_publish_push_button_);
   p_manipulation_reject_push_button_ = new QPushButton("Reject");
   p_manipulation_approval_layout->addWidget(p_manipulation_reject_push_button_);
+  p_manipulation_reset_push_button_ = new QPushButton("Reset");
+  p_manipulation_approval_layout->addWidget(p_manipulation_reset_push_button_);
 
   // Organize the layouts vertically
   QVBoxLayout *p_layout = new QVBoxLayout;
   p_layout->addLayout(p_manipulation_request_layout);
   p_layout->addLayout(p_manipulation_robot_id_combo_box_layout);
+  p_layout->addLayout(p_manipulation_selected_pixels_view_layout);
+  p_layout->addLayout(p_manipulation_override_toggle_layout);
   p_layout->addLayout(p_manipulation_approval_layout);
   setLayout(p_layout);
   setMinimumSize(0, 0);
@@ -68,10 +96,21 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   QTimer *p_timer_ = new QTimer(this);
 
   // Create Qt connections
-  QObject::connect(p_manipulation_approve_push_button_, SIGNAL(clicked()), this,
-                   SLOT(publishManipulationApproval()));
-  QObject::connect(p_manipulation_reject_push_button_, SIGNAL(clicked()), this,
-                   SLOT(publishManipulationRejection()));
+  QObject::connect(p_manipulation_image_label_,
+                   &ScaledClickableLabel::pixelClicked, this,
+                   &ManipulationApprovalPanel::handlePixelClick);
+  QObject::connect(p_prev_image_button_, &QPushButton::clicked, this,
+                   &ManipulationApprovalPanel::showPrevImage);
+  QObject::connect(p_next_image_button_, &QPushButton::clicked, this,
+                   &ManipulationApprovalPanel::showNextImage);
+  QObject::connect(p_manipulation_publish_push_button_, &QPushButton::clicked,
+                   this,
+                   &ManipulationApprovalPanel::publishManipulationApproval);
+  QObject::connect(p_manipulation_reject_push_button_, &QPushButton::clicked,
+                   this,
+                   &ManipulationApprovalPanel::publishManipulationRejection);
+  QObject::connect(p_manipulation_reset_push_button_, &QPushButton::clicked,
+                   this, &ManipulationApprovalPanel::resetSelection);
   QObject::connect(p_timer_, &QTimer::timeout, this,
                    &ManipulationApprovalPanel::publishSystemMonitor);
   p_timer_->start(500);
@@ -106,51 +145,194 @@ void ManipulationApprovalPanel::onInitialize() {
     auto const request_topic =
         "/" + robot_id + "/spot_executor_node/annotated_image";
     manipulation_request_subscriptions_.emplace(
-        robot_id,
-        node->create_subscription<sensor_msgs::msg::Image>(
-            request_topic, 10,
-            [this, robot_id](sensor_msgs::msg::Image::ConstSharedPtr msg) {
-              this->handleManipulationRequest(msg, robot_id);
-            }));
+        robot_id, node->create_subscription<
+                      nlu_interface_rviz::msg::ManipulationApprovalRequest>(
+                      request_topic, 10,
+                      [this, robot_id](
+                          nlu_interface_rviz::msg::ManipulationApprovalRequest::
+                              ConstSharedPtr msg) {
+                        this->handleManipulationRequest(msg, robot_id);
+                      }));
     auto const approval_topic =
         "/" + robot_id + "/spot_executor_node/pick_confirmation";
     manipulation_approval_publishers_.emplace(
-        robot_id,
-        node->create_publisher<std_msgs::msg::Bool>(approval_topic, 1));
+        robot_id, node->create_publisher<
+                      nlu_interface_rviz::msg::ManipulationApprovalResponse>(
+                      approval_topic, 1));
   }
   return;
 }
 
 void ManipulationApprovalPanel::handleManipulationRequest(
-    sensor_msgs::msg::Image::ConstSharedPtr msg, std::string const &robot_id) {
+    nlu_interface_rviz::msg::ManipulationApprovalRequest::ConstSharedPtr msg,
+    std::string const &robot_id) {
 
   // Set the combo box to the robot id
   p_manipulation_robot_id_combo_box_->setCurrentText(robot_id.c_str());
 
-  // Convert the image to a pixmap
-  auto qpixmap = image_msg_to_pixmap(msg);
-  qpixmap = qpixmap.scaled(msg->height, msg->width, Qt::KeepAspectRatio);
+  // Convert all images to pixmaps
+  candidate_pixmaps_.clear();
+  for (auto const &image_msg : msg->images) {
+    auto img = std::make_shared<sensor_msgs::msg::Image>(image_msg);
+    candidate_pixmaps_.push_back(image_msg_to_pixmap(img));
+  }
 
-  // Set the QLabel's pixmap
-  p_manipulation_image_label_->setOriginalPixmap(qpixmap);
+  // On first message, resize the panel to a reasonable default
+  if (!received_first_message_) {
+    received_first_message_ = true;
+    resize(480, 600);
+  }
+
+  // Store detection metadata and reset selection to detection
+  detection_image_index_ = static_cast<int>(msg->detection_image_index);
+  detection_x_ = msg->image_x;
+  detection_y_ = msg->image_y;
+  selected_image_index_ = detection_image_index_;
+  selected_pixel_ = std::make_pair(detection_x_, detection_y_);
+  current_image_index_ = detection_image_index_;
+
+  showCurrentImage();
+  return;
+}
+
+void ManipulationApprovalPanel::showCurrentImage() {
+  if (candidate_pixmaps_.empty())
+    return;
+
+  // Start from the clean base pixmap
+  p_base_pixmap_ = new QPixmap(candidate_pixmaps_[current_image_index_]);
+
+  // Draw selection marker whenever viewing the selected image
+  if (current_image_index_ == selected_image_index_ &&
+      selected_pixel_.has_value()) {
+    auto const [sx, sy] = selected_pixel_.value();
+    QPixmap annotated = *p_base_pixmap_;
+    QPainter painter(&annotated);
+    painter.setPen(QPen(Qt::red, 3));
+    int r = 15;
+    painter.drawEllipse(QPoint(sx, sy), r, r);
+    painter.drawLine(sx - r, sy, sx + r, sy);
+    painter.drawLine(sx, sy - r, sx, sy + r);
+    painter.end();
+    p_manipulation_image_label_->setOriginalPixmap(annotated);
+  } else {
+    p_manipulation_image_label_->setOriginalPixmap(*p_base_pixmap_);
+  }
+
+  // Always show current selection
+  if (selected_pixel_.has_value()) {
+    std::ostringstream oss;
+    oss << "Selected Pixels: (" << selected_pixel_->first << ", "
+        << selected_pixel_->second << ") [Image " << (selected_image_index_ + 1)
+        << "]";
+    p_selected_pixels_label_->setText(oss.str().c_str());
+  } else {
+    p_selected_pixels_label_->setText("Selected Pixels: N/A");
+  }
+
+  // Update image index label
+  std::ostringstream idx_oss;
+  idx_oss << "Image " << (current_image_index_ + 1) << " / "
+          << candidate_pixmaps_.size();
+  p_image_index_label_->setText(idx_oss.str().c_str());
+
+  // Green when viewing the selected image
+  if (current_image_index_ == selected_image_index_) {
+    p_image_index_label_->setStyleSheet(
+        "background-color: green; color: white; font-weight: bold;");
+  } else {
+    p_image_index_label_->setStyleSheet("");
+  }
+
+  return;
+}
+
+void ManipulationApprovalPanel::showPrevImage() {
+  if (candidate_pixmaps_.empty())
+    return;
+  current_image_index_ =
+      (current_image_index_ - 1 + static_cast<int>(candidate_pixmaps_.size())) %
+      static_cast<int>(candidate_pixmaps_.size());
+  showCurrentImage();
+  return;
+}
+
+void ManipulationApprovalPanel::showNextImage() {
+  if (candidate_pixmaps_.empty())
+    return;
+  current_image_index_ =
+      (current_image_index_ + 1) % static_cast<int>(candidate_pixmaps_.size());
+  showCurrentImage();
+  return;
+}
+
+void ManipulationApprovalPanel::handlePixelClick(int x, int y) {
+  {
+    std::ostringstream oss;
+    oss << "Clicked pixel: (" << x << "," << y << "). Pixel Override State: "
+        << p_manipulation_set_detection_toggle_button_->isChecked();
+    RCLCPP_INFO(rclcpp::get_logger("rviz_panel"), "%s", oss.str().c_str());
+  }
+  if (p_manipulation_set_detection_toggle_button_->isChecked()) {
+    selected_image_index_ = current_image_index_;
+    selected_pixel_ = std::pair<int, int>(x, y);
+    p_manipulation_set_detection_toggle_button_->setChecked(false);
+
+    if (p_base_pixmap_ != nullptr) {
+      QPixmap annotated = *p_base_pixmap_;
+      QPainter painter(&annotated);
+      painter.setPen(QPen(Qt::red, 3));
+      int r = 15;
+      painter.drawEllipse(QPoint(x, y), r, r);
+      painter.drawLine(x - r, y, x + r, y);
+      painter.drawLine(x, y - r, x, y + r);
+      painter.end();
+      p_manipulation_image_label_->setOriginalPixmap(annotated);
+    }
+
+    showCurrentImage();
+  }
+  {
+    std::ostringstream oss;
+    oss << "Updated selected_pixel_: ("
+        << (selected_pixel_ ? selected_pixel_->first : -1) << ", "
+        << (selected_pixel_ ? selected_pixel_->second : -1) << ") on image "
+        << selected_image_index_ << std::endl;
+    RCLCPP_INFO(rclcpp::get_logger("rviz_panel"), "%s", oss.str().c_str());
+  }
   return;
 }
 
 void ManipulationApprovalPanel::publishManipulationApproval(void) {
-  publishManipulationResponse(true);
+  auto msg = nlu_interface_rviz::msg::ManipulationApprovalResponse();
+  msg.approve = true;
+  msg.image_index = static_cast<uint32_t>(selected_image_index_);
+  msg.image_x = selected_pixel_ ? selected_pixel_->first : 0;
+  msg.image_y = selected_pixel_ ? selected_pixel_->second : 0;
+  publishManipulationResponse(msg);
   return;
 }
 
 void ManipulationApprovalPanel::publishManipulationRejection(void) {
-  publishManipulationResponse(false);
+  auto msg = nlu_interface_rviz::msg::ManipulationApprovalResponse();
+  msg.approve = false;
+  msg.image_index = 0;
+  msg.image_x = 0;
+  msg.image_y = 0;
+  publishManipulationResponse(msg);
+  return;
+}
+
+void ManipulationApprovalPanel::resetSelection(void) {
+  selected_image_index_ = detection_image_index_;
+  selected_pixel_ = std::make_pair(detection_x_, detection_y_);
+  current_image_index_ = selected_image_index_;
+  showCurrentImage();
   return;
 }
 
 void ManipulationApprovalPanel::publishManipulationResponse(
-    bool const approve) {
-  // Construct the approval message (bool)
-  auto msg = std_msgs::msg::Bool();
-  msg.data = approve;
+    nlu_interface_rviz::msg::ManipulationApprovalResponse const &msg) {
   // Get the publisher for the selected robot id
   auto it_publisher = manipulation_approval_publishers_.find(
       p_manipulation_robot_id_combo_box_->currentText().toStdString());
