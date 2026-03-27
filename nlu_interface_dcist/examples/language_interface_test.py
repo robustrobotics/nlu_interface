@@ -28,7 +28,7 @@ if __name__ == "__main__":
     with open(args.config, "r") as file:
         config = yaml.load(file)
 
-    # Load the scene graph and the associated labelspaces; Force overwriting the metadata for now
+    # Load the scene graph
     scene_graph = spark_dsg.DynamicSceneGraph.load(config["scene_graph"])
 
     # Load the LLM configuration and prompt
