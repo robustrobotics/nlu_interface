@@ -12,28 +12,53 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 
 find_package(ament_cmake_ros REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(ros_system_monitor_msgs REQUIRED)
 find_package(omniplanner_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(OpenCV REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/ManipulationApprovalRequest.msg"
+  "msg/ManipulationApprovalResponse.msg"
+  DEPENDENCIES sensor_msgs
+)
 
 set(CMAKE_AUTOMOC ON)
 qt5_wrap_cpp(MOC_FILES
   include/nlu_interface_rviz/instruction_panel.hpp
+  include/nlu_interface_rviz/manipulation_approval_panel.hpp
 )
 
-add_library(instruction_panel src/instruction_panel.cpp ${MOC_FILES})
-target_include_directories(instruction_panel PUBLIC
+add_library(nlu_rviz_panels 
+    src/instruction_panel.cpp 
+    src/manipulation_approval_panel.cpp 
+    ${MOC_FILES})
+
+rosidl_get_typesupport_target(
+  cpp_typesupport_target
+  ${PROJECT_NAME}
+  "rosidl_typesupport_cpp"
+)
+target_link_libraries(nlu_rviz_panels
+  ${cpp_typesupport_target}
+)
+
+target_include_directories(nlu_rviz_panels PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-ament_target_dependencies(instruction_panel
+ament_target_dependencies(nlu_rviz_panels
   pluginlib
   rviz_common
+  cv_bridge
   ros_system_monitor_msgs
   omniplanner_msgs
 )
-install(TARGETS instruction_panel
+install(TARGETS nlu_rviz_panels
         EXPORT export_nlu_interface_rviz
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
