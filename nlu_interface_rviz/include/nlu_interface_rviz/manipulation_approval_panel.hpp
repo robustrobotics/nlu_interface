@@ -124,6 +124,7 @@ protected:
   QSet<QString> robot_ids_;
   std::vector<QPixmap> candidate_pixmaps_;
   bool received_first_message_ = false;
+  bool has_detection_ = false;
   int current_image_index_ = 0;
   int detection_image_index_ = 0;
   int detection_x_ = 0;

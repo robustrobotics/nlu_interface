@@ -184,12 +184,19 @@ void ManipulationApprovalPanel::handleManipulationRequest(
   }
 
   // Store detection metadata and reset selection to detection
+  has_detection_ = msg->has_detection;
   detection_image_index_ = static_cast<int>(msg->detection_image_index);
   detection_x_ = msg->image_x;
   detection_y_ = msg->image_y;
-  selected_image_index_ = detection_image_index_;
-  selected_pixel_ = std::make_pair(detection_x_, detection_y_);
-  current_image_index_ = detection_image_index_;
+  if (has_detection_) {
+    selected_image_index_ = detection_image_index_;
+    selected_pixel_ = std::make_pair(detection_x_, detection_y_);
+    current_image_index_ = detection_image_index_;
+  } else {
+    selected_image_index_ = 0;
+    selected_pixel_ = std::nullopt;
+    current_image_index_ = 0;
+  }
 
   showCurrentImage();
   return;
@@ -324,9 +331,15 @@ void ManipulationApprovalPanel::publishManipulationRejection(void) {
 }
 
 void ManipulationApprovalPanel::resetSelection(void) {
-  selected_image_index_ = detection_image_index_;
-  selected_pixel_ = std::make_pair(detection_x_, detection_y_);
-  current_image_index_ = selected_image_index_;
+  if (has_detection_) {
+    selected_image_index_ = detection_image_index_;
+    selected_pixel_ = std::make_pair(detection_x_, detection_y_);
+    current_image_index_ = selected_image_index_;
+  } else {
+    selected_image_index_ = 0;
+    selected_pixel_ = std::nullopt;
+    current_image_index_ = 0;
+  }
   showCurrentImage();
   return;
 }
