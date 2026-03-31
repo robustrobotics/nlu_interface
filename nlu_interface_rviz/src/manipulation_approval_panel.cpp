@@ -143,7 +143,7 @@ void ManipulationApprovalPanel::onInitialize() {
   for (auto const &q_robot_id : robot_ids_) {
     auto const robot_id = q_robot_id.toStdString();
     auto const request_topic =
-        "/" + robot_id + "/spot_executor_node/annotated_image";
+        "/" + robot_id + "/spot_executor_node/manipulation_request";
     manipulation_request_subscriptions_.emplace(
         robot_id, node->create_subscription<
                       nlu_interface_rviz::msg::ManipulationApprovalRequest>(
@@ -364,7 +364,7 @@ void ManipulationApprovalPanel::publishSystemMonitor(void) {
   msg.nickname = "nlu_rviz_manipulation_panel";
   msg.node_name = p_node->get_fully_qualified_name();
   msg.status = ros_system_monitor_msgs::msg::NodeInfoMsg::NOMINAL;
-  msg.notes = "You gonna give me orders?";
+  msg.notes = "All I do is Pick-n-Place";
   system_monitor_publisher_->publish(msg);
   return;
 }
