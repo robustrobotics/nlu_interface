@@ -1,24 +1,26 @@
 #!/usr/bin/env python
 import argparse
-import ast
 import re
 
-import spark_dsg
 from ruamel.yaml import YAML
 
-from nlu_interface.config import LLMConfig, OpenAIConfig, AnthropicBedrockConfig
-from nlu_interface.prompt import Prompt, DefaultPrompt
-from nlu_interface.interface import OpenAIWrapper, AnthropicBedrockWrapper
+from nlu_interface.config import AnthropicBedrockConfig, LLMConfig
+from nlu_interface.interface import AnthropicBedrockWrapper
+from nlu_interface.prompt import DefaultPrompt
 
 yaml = YAML(typ="safe")
+
 
 def parse_response(response_string) -> str:
     response_match = re.search(r"<Answer>(.*?)</Answer>", response_string)
     if response_match:
         parsed_response = response_match.group(1)
     else:
-        raise ValueError(f"Unable to parse the answer from the response: {response_string}")
+        raise ValueError(
+            f"Unable to parse the answer from the response: {response_string}"
+        )
     return parsed_response
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -60,8 +62,10 @@ if __name__ == "__main__":
     secret_key = anthropic_config.resolve_secret_key()
     print(f"Loaded the secret_key: {secret_key}")
     print("Success!")
-    print("Constructing an AnthropicBedrockConfig using **kwargs (passing the config dict)")
-    
+    print(
+        "Constructing an AnthropicBedrockConfig using **kwargs (passing the config dict)"
+    )
+
     # Load a prompt
     with open(args.prompt, "r") as file:
         prompt_dict = yaml.load(file)
@@ -77,12 +81,12 @@ if __name__ == "__main__":
     )
     print("Success!")
     print("Constructing a DefaultPrompt using **kwargs...")
-    default_prompt = DefaultPrompt( **prompt_dict )
+    default_prompt = DefaultPrompt(**prompt_dict)
     print("Success!")
 
     # Render the prompt
     print("Rending the DefaultPrompt...")
-    rendered_prompt = default_prompt.render( 1 )
+    rendered_prompt = default_prompt.render(1)
     print(f"rendered prompt: {rendered_prompt}")
     print("Success!")
 

@@ -1,6 +1,7 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict
+from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
 
 @dataclass
 class IncontextExample:
@@ -17,6 +18,7 @@ class IncontextExample:
     def from_dict(cls, d):
         return cls(d["example_input"], d["example_output"])
 
+
 class Prompt(ABC):
     @abstractmethod
     def validate(self, num_incontext_examples: int):
@@ -32,12 +34,13 @@ class Prompt(ABC):
         """Return the prompt as expected for OpenAI responses API"""
         raise NotImplementedError("to_openai() not implemented.")
 
+
 class DefaultPrompt(Prompt):
     def __init__(
         self,
         system: str = None,
         incontext_examples_preamble: str = None,
-        incontext_examples: List[Dict[str,str]] = [],
+        incontext_examples: List[Dict[str, str]] = [],
         instruction_preamble: str = None,
         instruction: str = None,
         response_format: str = None,
@@ -45,7 +48,9 @@ class DefaultPrompt(Prompt):
         self.system = system
         self.incontext_examples_preamble = incontext_examples_preamble
         if incontext_examples:
-            self.incontext_examples = [IncontextExample.from_dict(e) for e in incontext_examples]
+            self.incontext_examples = [
+                IncontextExample.from_dict(e) for e in incontext_examples
+            ]
         else:
             self.incontext_examples = []
         self.instruction_preamble = instruction_preamble
@@ -65,9 +70,7 @@ class DefaultPrompt(Prompt):
         system_string = ""
         if self.system:
             if self.response_format and ("{response_format}" in self.system):
-                system_string = self.system.format(
-                    response_format=self.response_format
-                )
+                system_string = self.system.format(response_format=self.response_format)
             else:
                 system_string = self.system
         # Compose the incontext examples string
@@ -79,7 +82,9 @@ class DefaultPrompt(Prompt):
         # Compose the instruction string
         instruction_string = ""
         if self.instruction_preamble:
-            if self.response_format and ("{response_format}" in self.instruction_preamble):
+            if self.response_format and (
+                "{response_format}" in self.instruction_preamble
+            ):
                 instruction_string = self.instruction_preamble.format(
                     response_format=self.response_format
                 )
@@ -100,9 +105,7 @@ class DefaultPrompt(Prompt):
         system_string = ""
         if self.system:
             if self.response_format and ("{response_format}" in self.system):
-                system_string = self.system.format(
-                    response_format=self.response_format
-                )
+                system_string = self.system.format(response_format=self.response_format)
             else:
                 system_string = self.system
         # Compose the incontext examples string
@@ -114,7 +117,9 @@ class DefaultPrompt(Prompt):
         # Compose the instruction string
         instruction_string = ""
         if self.instruction_preamble:
-            if self.response_format and ("{response_format}" in self.instruction_preamble):
+            if self.response_format and (
+                "{response_format}" in self.instruction_preamble
+            ):
                 instruction_string = self.instruction_preamble.format(
                     response_format=self.response_format
                 )
@@ -132,9 +137,7 @@ class DefaultPrompt(Prompt):
         system_string = ""
         if self.system:
             if self.response_format and ("{response_format}" in self.system):
-                system_string = self.system.format(
-                    response_format=self.response_format
-                )
+                system_string = self.system.format(response_format=self.response_format)
             else:
                 system_string = self.system
         # Compose the incontext examples string
@@ -146,7 +149,9 @@ class DefaultPrompt(Prompt):
         # Compose the instruction string
         instruction_string = ""
         if self.instruction_preamble:
-            if self.response_format and ("{response_format}" in self.instruction_preamble):
+            if self.response_format and (
+                "{response_format}" in self.instruction_preamble
+            ):
                 instruction_string = self.instruction_preamble.format(
                     response_format=self.response_format
                 )
@@ -158,15 +163,15 @@ class DefaultPrompt(Prompt):
         full_sting = system_string + "\n" + user_string
         return full_sting
 
-    def to_anthropic(self, num_incontext_examples: int) -> Tuple[str, List[Dict[str, str]]]:
+    def to_anthropic(
+        self, num_incontext_examples: int
+    ) -> Tuple[str, List[Dict[str, str]]]:
         self.validate(num_incontext_examples)
         # Construct the system message string
         system_string = ""
         if self.system:
             if self.response_format and ("{response_format}" in self.system):
-                system_string = self.system.format(
-                    response_format=self.response_format
-                )
+                system_string = self.system.format(response_format=self.response_format)
             else:
                 system_string = self.system
         # Compose the incontext examples string
@@ -178,7 +183,9 @@ class DefaultPrompt(Prompt):
         # Compose the instruction string
         instruction_string = ""
         if self.instruction_preamble:
-            if self.response_format and ("{response_format}" in self.instruction_preamble):
+            if self.response_format and (
+                "{response_format}" in self.instruction_preamble
+            ):
                 instruction_string = self.instruction_preamble.format(
                     response_format=self.response_format
                 )

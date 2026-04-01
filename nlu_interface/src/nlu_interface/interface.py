@@ -1,21 +1,27 @@
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List, Tuple
 import logging
-logger = logging.getLogger(__name__)
+from abc import ABC, abstractmethod
+from typing import Generic, List, Tuple, TypeVar
 
-from nlu_interface.prompt import Prompt, DefaultPrompt
-from nlu_interface.config import LLMConfig, OpenAIConfig, OllamaConfig, AnthropicBedrockConfig
-
-import ollama
 import anthropic
-from anthropic.types import Message
+import ollama
 import openai
+from anthropic.types import Message
 from openai import APIResponse
 
+from nlu_interface.config import (
+    AnthropicBedrockConfig,
+    LLMConfig,
+    OllamaConfig,
+    OpenAIConfig,
+)
+from nlu_interface.prompt import Prompt
 
-P = TypeVar("P", bound=Prompt) # Prompt Type
-C = TypeVar("C", bound=LLMConfig) # Config Type
-R = TypeVar("R") # Response Type
+logger = logging.getLogger(__name__)
+
+P = TypeVar("P", bound=Prompt)  # Prompt Type
+C = TypeVar("C", bound=LLMConfig)  # Config Type
+R = TypeVar("R")  # Response Type
+
 
 class LLMInterface(ABC, Generic[P, C]):
     valid_model_names: Tuple = ()
@@ -44,8 +50,15 @@ class LLMInterface(ABC, Generic[P, C]):
     def _create_client(self):
         raise NotImplementedError('Subclasses must implement "_create_client()".')
 
+
 class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
-    valid_model_names = ("gpt-4o-mini-2024-07-18", "gpt-4o-2024-08-06", "gpt-4.1-mini-2025-04-14", "gpt-4.1-nano-2025-04-14", "gpt-4.1-2025-04-14")
+    valid_model_names = (
+        "gpt-4o-mini-2024-07-18",
+        "gpt-4o-2024-08-06",
+        "gpt-4.1-mini-2025-04-14",
+        "gpt-4.1-nano-2025-04-14",
+        "gpt-4.1-2025-04-14",
+    )
     valid_prompt_modes = ("default", "chain-of-thought")
 
     def __init__(
@@ -61,7 +74,7 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
         # Validate the configuration
         config.validate(
             valid_model_names=self.valid_model_names,
-            valid_prompt_modes=self.valid_prompt_modes
+            valid_prompt_modes=self.valid_prompt_modes,
         )
 
         # Create the OpenAI client
@@ -88,14 +101,14 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
 
     def _create_client(self):
         self.client = openai.OpenAI(
-            api_key = self.api_key,
-            timeout = self.api_timeout,
+            api_key=self.api_key,
+            timeout=self.api_timeout,
         )
         if self.debug:
             logger.debug(f"Created an OpenAI client for model {self.model}.")
 
+
 class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
-    
     def __init__(
         self,
         config: OllamaConfig,
@@ -103,16 +116,16 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
     ):
         super().__init__(config, prompt)
         self.ollama_url = config.ollama_url
-        
+
         self._create_client()
         self.valid_model_names = self._get_model_names()
         print(f"Valid model names: {self.valid_model_names}")
-        self.valid_prompt_modes = ("default")
+        self.valid_prompt_modes = "default"
 
         # Validate the configuration
         config.validate(
             valid_model_names=self.valid_model_names,
-            valid_prompt_modes=self.valid_prompt_modes
+            valid_prompt_modes=self.valid_prompt_modes,
         )
 
         # Create the Ollama client
@@ -124,14 +137,16 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
         )
         if self.debug:
             logger.debug(f"Created an Ollama client for url {self.ollama_url}.")
-            
+
     def _get_model_names(self) -> List[str]:
         model_list = self.client.list()
-        if model_list['models']:
-            return [model['model'] for model in model_list['models']]
+        if model_list["models"]:
+            return [model["model"] for model in model_list["models"]]
         else:
-            raise ValueError("No models found in Ollama client. Please check your Ollama server connection.")
-        
+            raise ValueError(
+                "No models found in Ollama client. Please check your Ollama server connection."
+            )
+
     def _query(self) -> APIResponse:
         if not self.prompt:
             raise ValueError("No prompt available in _query().")
@@ -141,14 +156,12 @@ class OllamaWrapper(LLMInterface[OllamaConfig, Prompt]):
                 f"Querying Ollama API ({self.model}).\nCurrent Prompt: {self.prompt.render(self.num_incontext_examples)}"
             )
 
-        response = self.client.generate(
-            model=self.model,
-            prompt=prompt
-        )
+        response = self.client.generate(model=self.model, prompt=prompt)
         self.response_history.append(response)
         output_text = response["response"]
         return output_text, response
-        
+
+
 class AnthropicBedrockWrapper(LLMInterface[AnthropicBedrockConfig, Prompt]):
     valid_model_names = (
         "anthropic.claude-3-5-haiku-20241022-v1:0",
