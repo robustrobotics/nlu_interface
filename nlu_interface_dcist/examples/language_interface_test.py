@@ -5,7 +5,11 @@ import ast
 import spark_dsg
 from ruamel.yaml import YAML
 
-from nlu_interface.llm_interface import OpenAIWrapper
+from nlu_interface.config import OpenAIConfig
+from nlu_interface_dcist.language_planning_interface import (
+    LanguagePddlInterface,
+    SimplePddlSceneGraphPrompt,
+)
 
 yaml = YAML(typ="safe")
 
@@ -35,19 +39,19 @@ if __name__ == "__main__":
     with open(config["llm_config"], "r") as file:
         llm_config = yaml.load(file)
     with open(llm_config["prompt"], "r") as file:
-        prompt = yaml.load(file)
+        prompt = SimplePddlSceneGraphPrompt(**yaml.load(file))
 
-    # Initialize an OpenAIWrapper
-    openai_interface = OpenAIWrapper(
+    config = OpenAIConfig(
         model=llm_config["model"],
-        mode=llm_config["mode"],
-        prompt=prompt,
+        prompt_mode=llm_config.get("mode", "default"),
+        prompt_type=llm_config.get("prompt_type", "default"),
         num_incontext_examples=llm_config["num_incontext_examples"],
         temperature=llm_config["temperature"],
         api_timeout=llm_config["api_timeout"],
         seed=llm_config["seed"],
-        api_key_env_var=llm_config["api_key_env_var"],
-        debug=llm_config["debug"],
+        api_key_env_var=llm_config.get("api_key_env_var", ""),
+        debug=llm_config.get("debug", False),
     )
+    openai_interface = LanguagePddlInterface(config=config, prompt=prompt)
 
     main(openai_interface, scene_graph)
