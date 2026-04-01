@@ -174,9 +174,11 @@ class LanguagePddlInterface(OpenAIWrapper):
         super().__init__(config=config, prompt=prompt)
 
     def parse_plan_specification_response(self, response_string):
-        response_match = re.search(r"<Answer>(.*?)</Answer>", response_string)
+        response_match = re.search(
+            r"<Answer>(.*?)</Answer>", response_string, re.DOTALL
+        )
         if response_match:
-            parsed_response = response_match.group(1)
+            parsed_response = response_match.group(1).strip()
         else:
             raise ValueError(
                 f"Unable to parse the answer from the response: {response_string}"
