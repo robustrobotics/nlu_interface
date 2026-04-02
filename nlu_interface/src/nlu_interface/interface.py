@@ -58,6 +58,7 @@ class OpenAIWrapper(LLMInterface[OpenAIConfig, Prompt]):
         "gpt-4.1-mini-2025-04-14",
         "gpt-4.1-nano-2025-04-14",
         "gpt-4.1-2025-04-14",
+        "gpt-4.1",
     )
     valid_prompt_modes = ("default", "chain-of-thought")
 
