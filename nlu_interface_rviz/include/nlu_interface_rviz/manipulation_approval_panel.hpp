@@ -17,7 +17,7 @@
 #include <std_msgs/msg/bool.hpp>
 
 // Qt
-#include <QComboBox>
+
 #include <QLabel>
 #include <QLineEdit>
 #include <QPainter>
@@ -123,6 +123,7 @@ protected:
   // Data members
   QSet<QString> robot_ids_;
   std::vector<QPixmap> candidate_pixmaps_;
+  std::vector<std::string> image_source_names_;
   bool received_first_message_ = false;
   bool has_detection_ = false;
   int current_image_index_ = 0;
@@ -150,7 +151,7 @@ protected:
       manipulation_approval_publishers_;
 
   // GUI member variables
-  QComboBox *p_manipulation_robot_id_combo_box_;
+  QLabel *p_manipulation_robot_id_label_;
   ScaledClickableLabel *p_manipulation_image_label_;
   QPixmap *p_base_pixmap_;
   QLabel *p_selected_pixels_label_;
