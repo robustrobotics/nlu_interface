@@ -60,11 +60,10 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
       p_manipulation_set_detection_toggle_button_);
 
   // Create the layout for the approval robot id
-  QHBoxLayout *p_manipulation_robot_id_combo_box_layout = new QHBoxLayout;
-  p_manipulation_robot_id_combo_box_layout->addWidget(new QLabel("Robot ID"));
-  p_manipulation_robot_id_combo_box_ = new QComboBox;
-  p_manipulation_robot_id_combo_box_layout->addWidget(
-      p_manipulation_robot_id_combo_box_);
+  QHBoxLayout *p_manipulation_robot_id_layout = new QHBoxLayout;
+  p_manipulation_robot_id_layout->addWidget(new QLabel("Robot ID:"));
+  p_manipulation_robot_id_label_ = new QLabel("N/A");
+  p_manipulation_robot_id_layout->addWidget(p_manipulation_robot_id_label_);
 
   // Create the layout for displaying the selected pixels
   QHBoxLayout *p_manipulation_selected_pixels_view_layout = new QHBoxLayout;
@@ -85,7 +84,7 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   // Organize the layouts vertically
   QVBoxLayout *p_layout = new QVBoxLayout;
   p_layout->addLayout(p_manipulation_request_layout);
-  p_layout->addLayout(p_manipulation_robot_id_combo_box_layout);
+  p_layout->addLayout(p_manipulation_robot_id_layout);
   p_layout->addLayout(p_manipulation_selected_pixels_view_layout);
   p_layout->addLayout(p_manipulation_override_toggle_layout);
   p_layout->addLayout(p_manipulation_approval_layout);
@@ -131,9 +130,6 @@ void ManipulationApprovalPanel::onInitialize() {
     robot_ids_.insert(s.c_str());
   }
 
-  p_manipulation_robot_id_combo_box_->addItems(
-      QList<QString>(robot_ids_.begin(), robot_ids_.end()));
-
   // Create the publishers
   system_monitor_publisher_ =
       node->create_publisher<ros_system_monitor_msgs::msg::NodeInfoMsg>(
@@ -167,14 +163,20 @@ void ManipulationApprovalPanel::handleManipulationRequest(
     nlu_interface_rviz::msg::ManipulationApprovalRequest::ConstSharedPtr msg,
     std::string const &robot_id) {
 
-  // Set the combo box to the robot id
-  p_manipulation_robot_id_combo_box_->setCurrentText(robot_id.c_str());
+  // Set the robot id label
+  p_manipulation_robot_id_label_->setText(robot_id.c_str());
 
   // Convert all images to pixmaps
   candidate_pixmaps_.clear();
   for (auto const &image_msg : msg->images) {
     auto img = std::make_shared<sensor_msgs::msg::Image>(image_msg);
     candidate_pixmaps_.push_back(image_msg_to_pixmap(img));
+  }
+
+  // Store image source names
+  image_source_names_.clear();
+  for (auto const &name : msg->image_source_names) {
+    image_source_names_.push_back(name);
   }
 
   // On first message, resize the panel to a reasonable default
@@ -230,8 +232,13 @@ void ManipulationApprovalPanel::showCurrentImage() {
   if (selected_pixel_.has_value()) {
     std::ostringstream oss;
     oss << "Selected Pixels: (" << selected_pixel_->first << ", "
-        << selected_pixel_->second << ") [Image " << (selected_image_index_ + 1)
-        << "]";
+        << selected_pixel_->second << ") [";
+    if (selected_image_index_ < static_cast<int>(image_source_names_.size())) {
+      oss << image_source_names_[selected_image_index_];
+    } else {
+      oss << "Image " << (selected_image_index_ + 1);
+    }
+    oss << "]";
     p_selected_pixels_label_->setText(oss.str().c_str());
   } else {
     p_selected_pixels_label_->setText("Selected Pixels: N/A");
@@ -239,8 +246,14 @@ void ManipulationApprovalPanel::showCurrentImage() {
 
   // Update image index label
   std::ostringstream idx_oss;
-  idx_oss << "Image " << (current_image_index_ + 1) << " / "
-          << candidate_pixmaps_.size();
+  if (current_image_index_ < static_cast<int>(image_source_names_.size())) {
+    idx_oss << image_source_names_[current_image_index_] << " ("
+            << (current_image_index_ + 1) << " / " << candidate_pixmaps_.size()
+            << ")";
+  } else {
+    idx_oss << "Image " << (current_image_index_ + 1) << " / "
+            << candidate_pixmaps_.size();
+  }
   p_image_index_label_->setText(idx_oss.str().c_str());
 
   // Green when viewing the selected image
@@ -348,7 +361,7 @@ void ManipulationApprovalPanel::publishManipulationResponse(
     nlu_interface_rviz::msg::ManipulationApprovalResponse const &msg) {
   // Get the publisher for the selected robot id
   auto it_publisher = manipulation_approval_publishers_.find(
-      p_manipulation_robot_id_combo_box_->currentText().toStdString());
+      p_manipulation_robot_id_label_->text().toStdString());
   assert(it_publisher != manipulation_approval_publishers_.end());
   // Publish the approval message
   it_publisher->second->publish(msg);
