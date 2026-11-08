@@ -50,14 +50,26 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   p_image_cycle_layout->addWidget(p_next_image_button_);
   p_manipulation_request_layout->addLayout(p_image_cycle_layout);
 
-  // Create the layout for the override toggle button
+  // Create the layout for the override toggle buttons. The selected pixel is
+  // either the grasp point (Publish) or the ground/object point to walk
+  // toward (Walk To). The stand-point toggle is the optional heading control
+  // and stays hidden unless enabled by parameter.
   QHBoxLayout *p_manipulation_override_toggle_layout = new QHBoxLayout;
   p_manipulation_set_detection_toggle_button_ =
-      new QPushButton("Select New Detection Pixel");
+      new QPushButton("Select Pixel (grasp / walk-to target)");
   p_manipulation_set_detection_toggle_button_->setCheckable(
       true); // make it toggle
   p_manipulation_override_toggle_layout->addWidget(
       p_manipulation_set_detection_toggle_button_);
+  p_manipulation_set_stand_point_toggle_button_ =
+      new QPushButton("Select Stand Point (heading)");
+  p_manipulation_set_stand_point_toggle_button_->setCheckable(true);
+  p_manipulation_set_stand_point_toggle_button_->setToolTip(
+      "Walk To only: click the ground pixel Spot should stand on. It will "
+      "face the selected target pixel from there.");
+  p_manipulation_set_stand_point_toggle_button_->setVisible(false);
+  p_manipulation_override_toggle_layout->addWidget(
+      p_manipulation_set_stand_point_toggle_button_);
 
   // Create the layout for the approval robot id
   QHBoxLayout *p_manipulation_robot_id_layout = new QHBoxLayout;
@@ -71,11 +83,25 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   p_manipulation_selected_pixels_view_layout->addWidget(
       p_selected_pixels_label_);
 
-  // Create the layout for the publish/reject/reset buttons
+  // Create the layout for the status line
+  QHBoxLayout *p_status_layout = new QHBoxLayout;
+  p_status_label_ = new QLabel("Waiting for a manipulation request.");
+  p_status_label_->setWordWrap(true);
+  p_status_layout->addWidget(p_status_label_);
+
+  // Create the layout for the publish/walk-to/reject/reset buttons
   QHBoxLayout *p_manipulation_approval_layout = new QHBoxLayout;
   p_manipulation_publish_push_button_ = new QPushButton("Publish");
+  p_manipulation_publish_push_button_->setToolTip(
+      "Approve: grasp at the selected pixel.");
   p_manipulation_approval_layout->addWidget(
       p_manipulation_publish_push_button_);
+  p_manipulation_walk_to_push_button_ = new QPushButton("Walk To");
+  p_manipulation_walk_to_push_button_->setToolTip(
+      "Do not grasp yet: walk toward the selected ground/object pixel, then "
+      "take new images and ask again.");
+  p_manipulation_approval_layout->addWidget(
+      p_manipulation_walk_to_push_button_);
   p_manipulation_reject_push_button_ = new QPushButton("Reject");
   p_manipulation_approval_layout->addWidget(p_manipulation_reject_push_button_);
   p_manipulation_reset_push_button_ = new QPushButton("Reset");
@@ -86,6 +112,7 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   p_layout->addLayout(p_manipulation_request_layout);
   p_layout->addLayout(p_manipulation_robot_id_layout);
   p_layout->addLayout(p_manipulation_selected_pixels_view_layout);
+  p_layout->addLayout(p_status_layout);
   p_layout->addLayout(p_manipulation_override_toggle_layout);
   p_layout->addLayout(p_manipulation_approval_layout);
   setLayout(p_layout);
@@ -108,8 +135,23 @@ ManipulationApprovalPanel::ManipulationApprovalPanel(QWidget *parent)
   QObject::connect(p_manipulation_reject_push_button_, &QPushButton::clicked,
                    this,
                    &ManipulationApprovalPanel::publishManipulationRejection);
+  QObject::connect(p_manipulation_walk_to_push_button_, &QPushButton::clicked,
+                   this, &ManipulationApprovalPanel::publishWalkTo);
   QObject::connect(p_manipulation_reset_push_button_, &QPushButton::clicked,
                    this, &ManipulationApprovalPanel::resetSelection);
+  // The two pixel-selection toggles are mutually exclusive.
+  QObject::connect(p_manipulation_set_detection_toggle_button_,
+                   &QPushButton::toggled, this, [this](bool checked) {
+                     if (checked)
+                       p_manipulation_set_stand_point_toggle_button_->setChecked(
+                           false);
+                   });
+  QObject::connect(p_manipulation_set_stand_point_toggle_button_,
+                   &QPushButton::toggled, this, [this](bool checked) {
+                     if (checked)
+                       p_manipulation_set_detection_toggle_button_->setChecked(
+                           false);
+                   });
   QObject::connect(p_timer_, &QTimer::timeout, this,
                    &ManipulationApprovalPanel::publishSystemMonitor);
   p_timer_->start(500);
@@ -129,6 +171,16 @@ void ManipulationApprovalPanel::onInitialize() {
   for (auto &s : param_robot_ids.as_string_array()) {
     robot_ids_.insert(s.c_str());
   }
+
+  // Heading control for Walk To is a feature flag, off by default.
+  if (!node->has_parameter("manipulation_walk_to_heading_selection")) {
+    node->declare_parameter<bool>("manipulation_walk_to_heading_selection",
+                                  false);
+  }
+  heading_selection_enabled_ =
+      node->get_parameter("manipulation_walk_to_heading_selection").as_bool();
+  p_manipulation_set_stand_point_toggle_button_->setVisible(
+      heading_selection_enabled_);
 
   // Create the publishers
   system_monitor_publisher_ =
@@ -199,6 +251,16 @@ void ManipulationApprovalPanel::handleManipulationRequest(
     selected_pixel_ = std::nullopt;
     current_image_index_ = 0;
   }
+  // A new request (e.g. after a walk-to) always starts without a stand point.
+  stand_pixel_ = std::nullopt;
+  stand_image_index_ = 0;
+  p_manipulation_set_detection_toggle_button_->setChecked(false);
+  p_manipulation_set_stand_point_toggle_button_->setChecked(false);
+  p_status_label_->setText(
+      has_detection_
+          ? "New request: review the detection, then Publish, Walk To or Reject."
+          : "New request: no detection. Select a pixel, then Publish, Walk To "
+            "or Reject.");
 
   showCurrentImage();
   return;
@@ -211,22 +273,35 @@ void ManipulationApprovalPanel::showCurrentImage() {
   // Start from the clean base pixmap
   p_base_pixmap_ = new QPixmap(candidate_pixmaps_[current_image_index_]);
 
-  // Draw selection marker whenever viewing the selected image
+  // Draw the selection (red crosshair) and, if set, the stand point (blue
+  // square) whenever viewing the image they belong to.
+  QPixmap annotated = *p_base_pixmap_;
+  bool drew = false;
+  QPainter painter(&annotated);
   if (current_image_index_ == selected_image_index_ &&
       selected_pixel_.has_value()) {
     auto const [sx, sy] = selected_pixel_.value();
-    QPixmap annotated = *p_base_pixmap_;
-    QPainter painter(&annotated);
     painter.setPen(QPen(Qt::red, 3));
     int r = 15;
     painter.drawEllipse(QPoint(sx, sy), r, r);
     painter.drawLine(sx - r, sy, sx + r, sy);
     painter.drawLine(sx, sy - r, sx, sy + r);
-    painter.end();
-    p_manipulation_image_label_->setOriginalPixmap(annotated);
-  } else {
-    p_manipulation_image_label_->setOriginalPixmap(*p_base_pixmap_);
+    drew = true;
   }
+  if (current_image_index_ == stand_image_index_ && stand_pixel_.has_value()) {
+    auto const [px, py] = stand_pixel_.value();
+    painter.setPen(QPen(Qt::blue, 3));
+    int r = 12;
+    painter.drawRect(px - r, py - r, 2 * r, 2 * r);
+    if (current_image_index_ == selected_image_index_ &&
+        selected_pixel_.has_value()) {
+      painter.drawLine(px, py, selected_pixel_->first, selected_pixel_->second);
+    }
+    drew = true;
+  }
+  painter.end();
+  p_manipulation_image_label_->setOriginalPixmap(drew ? annotated
+                                                      : *p_base_pixmap_);
 
   // Always show current selection
   if (selected_pixel_.has_value()) {
@@ -239,6 +314,13 @@ void ManipulationApprovalPanel::showCurrentImage() {
       oss << "Image " << (selected_image_index_ + 1);
     }
     oss << "]";
+    if (stand_pixel_.has_value()) {
+      oss << "  Stand: (" << stand_pixel_->first << ", " << stand_pixel_->second
+          << ")";
+      if (stand_image_index_ != selected_image_index_) {
+        oss << " [other image: ignored]";
+      }
+    }
     p_selected_pixels_label_->setText(oss.str().c_str());
   } else {
     p_selected_pixels_label_->setText("Selected Pixels: N/A");
@@ -297,19 +379,11 @@ void ManipulationApprovalPanel::handlePixelClick(int x, int y) {
     selected_image_index_ = current_image_index_;
     selected_pixel_ = std::pair<int, int>(x, y);
     p_manipulation_set_detection_toggle_button_->setChecked(false);
-
-    if (p_base_pixmap_ != nullptr) {
-      QPixmap annotated = *p_base_pixmap_;
-      QPainter painter(&annotated);
-      painter.setPen(QPen(Qt::red, 3));
-      int r = 15;
-      painter.drawEllipse(QPoint(x, y), r, r);
-      painter.drawLine(x - r, y, x + r, y);
-      painter.drawLine(x, y - r, x, y + r);
-      painter.end();
-      p_manipulation_image_label_->setOriginalPixmap(annotated);
-    }
-
+    showCurrentImage();
+  } else if (p_manipulation_set_stand_point_toggle_button_->isChecked()) {
+    stand_image_index_ = current_image_index_;
+    stand_pixel_ = std::pair<int, int>(x, y);
+    p_manipulation_set_stand_point_toggle_button_->setChecked(false);
     showCurrentImage();
   }
   {
@@ -324,22 +398,63 @@ void ManipulationApprovalPanel::handlePixelClick(int x, int y) {
 }
 
 void ManipulationApprovalPanel::publishManipulationApproval(void) {
+  if (!selected_pixel_.has_value()) {
+    p_status_label_->setText(
+        "Publish needs a grasp pixel: select one or Reject.");
+    return;
+  }
   auto msg = nlu_interface_rviz::msg::ManipulationApprovalResponse();
   msg.approve = true;
+  msg.walk_to = false;
   msg.image_index = static_cast<uint32_t>(selected_image_index_);
-  msg.image_x = selected_pixel_ ? selected_pixel_->first : 0;
-  msg.image_y = selected_pixel_ ? selected_pixel_->second : 0;
+  msg.image_x = selected_pixel_->first;
+  msg.image_y = selected_pixel_->second;
   publishManipulationResponse(msg);
+  p_status_label_->setText("Approval sent; the robot is grasping.");
   return;
 }
 
 void ManipulationApprovalPanel::publishManipulationRejection(void) {
   auto msg = nlu_interface_rviz::msg::ManipulationApprovalResponse();
   msg.approve = false;
+  msg.walk_to = false;
   msg.image_index = 0;
   msg.image_x = 0;
   msg.image_y = 0;
   publishManipulationResponse(msg);
+  p_status_label_->setText("Rejection sent; the grasp attempt is abandoned.");
+  return;
+}
+
+void ManipulationApprovalPanel::publishWalkTo(void) {
+  if (!selected_pixel_.has_value()) {
+    p_status_label_->setText(
+        "Walk To needs a target: select the ground/object pixel first.");
+    return;
+  }
+  auto msg = nlu_interface_rviz::msg::ManipulationApprovalResponse();
+  msg.approve = false;
+  msg.walk_to = true;
+  msg.image_index = static_cast<uint32_t>(selected_image_index_);
+  msg.image_x = selected_pixel_->first;
+  msg.image_y = selected_pixel_->second;
+  msg.has_stand_point = false;
+  if (heading_selection_enabled_ && stand_pixel_.has_value()) {
+    if (stand_image_index_ == selected_image_index_) {
+      msg.has_stand_point = true;
+      msg.stand_x = stand_pixel_->first;
+      msg.stand_y = stand_pixel_->second;
+    } else {
+      RCLCPP_WARN(rclcpp::get_logger("rviz_panel"),
+                  "Stand point is on a different image than the target; "
+                  "sending walk-to with the default standoff instead.");
+    }
+  }
+  publishManipulationResponse(msg);
+  p_status_label_->setText(
+      msg.has_stand_point
+          ? "Walk-to sent (with stand point); waiting for new images..."
+          : "Walk-to sent; waiting for new images...");
   return;
 }
 
@@ -353,6 +468,10 @@ void ManipulationApprovalPanel::resetSelection(void) {
     selected_pixel_ = std::nullopt;
     current_image_index_ = 0;
   }
+  stand_pixel_ = std::nullopt;
+  stand_image_index_ = 0;
+  p_manipulation_set_detection_toggle_button_->setChecked(false);
+  p_manipulation_set_stand_point_toggle_button_->setChecked(false);
   showCurrentImage();
   return;
 }

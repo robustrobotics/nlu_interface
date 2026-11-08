@@ -132,6 +132,12 @@ protected:
   int detection_y_ = 0;
   int selected_image_index_ = 0;
   std::optional<std::pair<int, int>> selected_pixel_;
+  // Optional heading control for walk-to: the ground pixel Spot should stand
+  // on, facing the selected pixel. Only offered when the rviz node parameter
+  // `manipulation_walk_to_heading_selection` is true (off by default).
+  bool heading_selection_enabled_ = false;
+  int stand_image_index_ = 0;
+  std::optional<std::pair<int, int>> stand_pixel_;
 
   // ROS2 member variables
   std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface>
@@ -157,17 +163,21 @@ protected:
   QLabel *p_selected_pixels_label_;
   QPushButton *p_manipulation_publish_push_button_;
   QPushButton *p_manipulation_reject_push_button_;
+  QPushButton *p_manipulation_walk_to_push_button_;
   QPushButton *p_manipulation_reset_push_button_;
   QPushButton *p_manipulation_set_detection_toggle_button_;
+  QPushButton *p_manipulation_set_stand_point_toggle_button_;
   QPushButton *p_prev_image_button_;
   QPushButton *p_next_image_button_;
   QLabel *p_image_index_label_;
+  QLabel *p_status_label_;
   QTimer *p_timer_;
 
 private Q_SLOTS:
   void handlePixelClick(int x, int y);
   void publishManipulationApproval(void);
   void publishManipulationRejection(void);
+  void publishWalkTo(void);
   void resetSelection(void);
   void publishSystemMonitor(void);
   void showPrevImage(void);
