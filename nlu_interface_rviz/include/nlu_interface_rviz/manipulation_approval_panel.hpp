@@ -2,7 +2,12 @@
 #define NLU_INTERFACE_RVIZ__MANIPULATION_APPROVAL_PANEL_HPP_
 
 // STL
+#include <array>
 #include <optional>
+#include <vector>
+
+// OpenCV
+#include <opencv2/core.hpp>
 
 // ROS
 #include "rclcpp/rclcpp.hpp"
@@ -18,6 +23,7 @@
 
 // Qt
 
+#include <QCheckBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPainter>
@@ -43,6 +49,8 @@ public:
 
 signals:
   void pixelClicked(int x, int y);
+  void pixelHovered(int x, int y);
+  void hoverLeft();
 
 protected:
   void resizeEvent(QResizeEvent *event) override {
@@ -51,44 +59,48 @@ protected:
     return;
   }
 
+  // Map a widget position to a full-resolution image pixel; false if outside.
+  bool toImagePixel(QPoint const &pos, int &image_x, int &image_y) const {
+    if (original_pixmap_.isNull())
+      return false;
+    double scale = std::min(static_cast<double>(this->size().width()) /
+                                original_pixmap_.size().width(),
+                            static_cast<double>(this->size().height()) /
+                                original_pixmap_.size().height());
+    double offset_x =
+        (this->size().width() - original_pixmap_.size().width() * scale) / 2.0;
+    double offset_y =
+        (this->size().height() - original_pixmap_.size().height() * scale) /
+        2.0;
+    image_x = static_cast<int>((pos.x() - offset_x) / scale);
+    image_y = static_cast<int>((pos.y() - offset_y) / scale);
+    return image_x >= 0 && image_x < original_pixmap_.width() && image_y >= 0 &&
+           image_y < original_pixmap_.height();
+  }
+
   void mousePressEvent(QMouseEvent *event) override {
-    std::cout << "In mousePressEvent()" << std::endl;
-    if (event->button() == Qt::LeftButton) {
-      auto label_x = event->pos().x();
-      auto label_y = event->pos().y();
-
-      double scale = std::min(static_cast<double>(this->size().width()) /
-                                  original_pixmap_.size().width(),
-                              static_cast<double>(this->size().height()) /
-                                  original_pixmap_.size().height());
-
-      double offset_x =
-          (this->size().width() - original_pixmap_.size().width() * scale) /
-          2.0;
-      double offset_y =
-          (this->size().height() - original_pixmap_.size().height() * scale) /
-          2.0;
-
-      int image_x = static_cast<int>((label_x - offset_x) / scale);
-      int image_y = static_cast<int>((label_y - offset_y) / scale);
-
-      std::cout << "Left Clicked Location: " << label_x << "," << label_y
-                << std::endl;
-      std::cout << "Scale: " << scale << " Offset: " << offset_x << ","
-                << offset_y << std::endl;
-      std::cout << "Left Clicked Pixel: " << image_x << "," << image_y
-                << std::endl;
-
-      // Only emit if click is within the image bounds
-      if (image_x < 0 || image_x >= original_pixmap_.width() || image_y < 0 ||
-          image_y >= original_pixmap_.height()) {
-        return;
-      }
-
+    int image_x = 0, image_y = 0;
+    if (event->button() == Qt::LeftButton &&
+        toImagePixel(event->pos(), image_x, image_y)) {
       emit pixelClicked(image_x, image_y);
     }
     QLabel::mousePressEvent(event);
     return;
+  }
+
+  void mouseMoveEvent(QMouseEvent *event) override {
+    int image_x = 0, image_y = 0;
+    if (toImagePixel(event->pos(), image_x, image_y)) {
+      emit pixelHovered(image_x, image_y);
+    } else {
+      emit hoverLeft();
+    }
+    QLabel::mouseMoveEvent(event);
+  }
+
+  void leaveEvent(QEvent *event) override {
+    emit hoverLeft();
+    QLabel::leaveEvent(event);
   }
 
 private:
@@ -132,6 +144,46 @@ protected:
   int detection_y_ = 0;
   int selected_image_index_ = 0;
   std::optional<std::pair<int, int>> selected_pixel_;
+  // Optional heading control for walk-to: the ground pixel Spot should stand
+  // on, facing the selected pixel. Only offered when the rviz node parameter
+  // `manipulation_walk_to_heading_selection` is true (off by default).
+  bool heading_selection_enabled_ = false;
+  int stand_image_index_ = 0;
+  std::optional<std::pair<int, int>> stand_pixel_;
+
+  // Depth registered to each candidate image (CV_16UC1, empty when absent),
+  // its raw units per meter, and a colourised overlay for display only.
+  std::vector<cv::Mat> depth_images_;
+  std::vector<double> depth_scales_;
+  std::vector<QPixmap> depth_overlays_;
+
+  // Geometry behind the robot's walk-to estimate (vision frame), per image.
+  struct CameraGeometry {
+    bool valid = false;
+    double fx = 0, fy = 0, cx = 0, cy = 0;
+    std::array<double, 3> origin{};
+    std::array<double, 9> rotation{}; // row-major vision_R_camera
+  };
+  std::vector<CameraGeometry> cameras_;
+  bool has_ground_ = false;
+  std::array<double, 3> ground_point_{};
+  std::array<double, 3> ground_normal_{};
+  bool has_robot_ = false;
+  double robot_x_ = 0, robot_y_ = 0;
+  double walk_standoff_ = 0, walk_max_distance_ = 0;
+
+  struct GroundEstimate {
+    bool available = false; // geometry present for this image
+    bool hit = false;       // ray meets the floor within range
+    double distance = 0;    // horizontal robot -> target (m)
+    double walk = 0;        // planned move (m); 0 = turn only
+    bool capped = false;
+  };
+  GroundEstimate groundEstimate(int index, int x, int y) const;
+  std::optional<double> depthAt(int index, int x, int y) const;
+  bool estimateUnreliable(int index) const;
+  std::string describePoint(int index, int x, int y) const;
+  void updateWalkButtonLabel();
 
   // ROS2 member variables
   std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface>
@@ -153,23 +205,33 @@ protected:
   // GUI member variables
   QLabel *p_manipulation_robot_id_label_;
   ScaledClickableLabel *p_manipulation_image_label_;
-  QPixmap *p_base_pixmap_;
+  QPixmap *p_base_pixmap_ = nullptr;
   QLabel *p_selected_pixels_label_;
   QPushButton *p_manipulation_publish_push_button_;
   QPushButton *p_manipulation_reject_push_button_;
+  QPushButton *p_manipulation_walk_to_push_button_;
   QPushButton *p_manipulation_reset_push_button_;
   QPushButton *p_manipulation_set_detection_toggle_button_;
+  QPushButton *p_manipulation_set_stand_point_toggle_button_;
   QPushButton *p_prev_image_button_;
   QPushButton *p_next_image_button_;
   QLabel *p_image_index_label_;
+  QLabel *p_status_label_;
+  QCheckBox *p_show_depth_checkbox_;
+  QLabel *p_cursor_label_;
+  QLabel *p_estimate_warning_label_;
+  QLabel *p_walk_note_label_;
   QTimer *p_timer_;
 
 private Q_SLOTS:
   void handlePixelClick(int x, int y);
   void publishManipulationApproval(void);
   void publishManipulationRejection(void);
+  void publishWalkTo(void);
   void resetSelection(void);
   void publishSystemMonitor(void);
+  void handlePixelHover(int x, int y);
+  void handleHoverLeft(void);
   void showPrevImage(void);
   void showNextImage(void);
 }; // class ManipulationApprovalPanel

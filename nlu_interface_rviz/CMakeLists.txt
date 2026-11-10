@@ -45,6 +45,7 @@ rosidl_get_typesupport_target(
 )
 target_link_libraries(nlu_rviz_panels
   ${cpp_typesupport_target}
+  ${OpenCV_LIBS}
 )
 
 target_include_directories(nlu_rviz_panels PUBLIC
