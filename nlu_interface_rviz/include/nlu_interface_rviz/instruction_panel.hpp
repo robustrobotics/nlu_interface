@@ -6,6 +6,7 @@
 #include <omniplanner_msgs/msg/goto_points_goal_msg.hpp>
 #include <omniplanner_msgs/msg/language_goal_msg.hpp>
 #include <ros_system_monitor_msgs/msg/node_info_msg.hpp>
+#include <rviz_common/config.hpp>
 #include <rviz_common/panel.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
 #include <std_msgs/msg/string.hpp>
@@ -26,13 +27,21 @@ public:
   explicit InstructionPanel(QWidget *parent = 0);
   ~InstructionPanel() override = default;
   void onInitialize() override;
+  void load(const rviz_common::Config &config) override;
+  void save(rviz_common::Config config) const override;
 
 protected:
   // ROS callbacks
   void handleLLMResponse(std_msgs::msg::String::ConstSharedPtr msg);
+  // Select the entry whose robot id is `robot_id` ("" = any robot), if listed.
+  void selectRobotId(const QString &robot_id);
 
   // Data members
   QSet<QString> robot_ids_;
+  // Robot id restored from the saved RViz config, applied once the combo box
+  // is populated (RViz may load the config before onInitialize()).
+  QString saved_robot_id_;
+  bool has_saved_robot_id_ = false;
 
   // ROS2 member variables
   std::shared_ptr<rviz_common::ros_integration::RosNodeAbstractionIface>
