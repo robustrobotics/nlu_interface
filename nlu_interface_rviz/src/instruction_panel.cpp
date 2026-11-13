@@ -73,8 +73,17 @@ void InstructionPanel::onInitialize() {
     robot_ids_.insert(s.c_str());
   }
 
-  p_robot_id_combo_box_->addItems(
-      QList<QString>(robot_ids_.begin(), robot_ids_.end()));
+  // The first entry sends an empty robot_id: the planner may split the
+  // instruction across the whole team. A named robot pins it to that robot.
+  p_robot_id_combo_box_->addItem("Any robot (team)", QString());
+  QStringList sorted_ids(robot_ids_.begin(), robot_ids_.end());
+  sorted_ids.sort();
+  for (const auto &id : sorted_ids) {
+    p_robot_id_combo_box_->addItem(id, id);
+  }
+  if (has_saved_robot_id_) {
+    selectRobotId(saved_robot_id_);
+  }
 
   // Create the publishers
   instruction_publisher_ =
@@ -91,6 +100,37 @@ void InstructionPanel::onInitialize() {
   return;
 }
 
+void InstructionPanel::selectRobotId(const QString &robot_id) {
+  const int index = p_robot_id_combo_box_->findData(robot_id);
+  if (index >= 0) {
+    p_robot_id_combo_box_->setCurrentIndex(index);
+  }
+}
+
+void InstructionPanel::load(const rviz_common::Config &config) {
+  rviz_common::Panel::load(config);
+  QString robot_id;
+  if (config.mapGetString("RobotId", &robot_id)) {
+    saved_robot_id_ = robot_id;
+    has_saved_robot_id_ = true;
+    selectRobotId(robot_id);
+  }
+  QString domain_type;
+  if (config.mapGetString("DomainType", &domain_type)) {
+    const int index = p_domain_type_combo_box_->findText(domain_type);
+    if (index >= 0) {
+      p_domain_type_combo_box_->setCurrentIndex(index);
+    }
+  }
+}
+
+void InstructionPanel::save(rviz_common::Config config) const {
+  rviz_common::Panel::save(config);
+  config.mapSetValue("RobotId",
+                     p_robot_id_combo_box_->currentData().toString());
+  config.mapSetValue("DomainType", p_domain_type_combo_box_->currentText());
+}
+
 void InstructionPanel::handleLLMResponse(
     std_msgs::msg::String::ConstSharedPtr msg) {
   p_llm_response_textbox_->setText(msg->data.c_str());
@@ -100,7 +140,8 @@ void InstructionPanel::handleLLMResponse(
 void InstructionPanel::publishInstruction(void) {
   // Construct and publish the instruction text as a String message
   auto msg = omniplanner_msgs::msg::LanguageGoalMsg();
-  msg.robot_id = p_robot_id_combo_box_->currentText().toStdString();
+  // Item data holds the robot id; it is empty for "Any robot (team)".
+  msg.robot_id = p_robot_id_combo_box_->currentData().toString().toStdString();
   msg.command = p_instruction_editor_->text().toStdString();
   msg.domain_type = p_domain_type_combo_box_->currentText().toStdString();
   instruction_publisher_->publish(msg);
